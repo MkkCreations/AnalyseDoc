@@ -1,0 +1,171 @@
+@import './variables.css';
+
+.preview {
+    width: 100%;
+    background-color: var(--bgy);
+}
+
+.preview main {
+    width: 80%;
+    margin: auto;
+}
+
+.preview main h2 {
+    font-weight: 400;
+    margin-bottom: 3%;
+    color: var(--bgb);
+}
+
+.preview main a {
+    text-decoration: none;
+    color: var(--bgb);
+}
+
+.preview main span {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+.preview main span:first-of-type {
+    flex-wrap: wrap-reverse;
+    margin: 4% 0;
+}
+
+.preview main span > div {
+    display: flex;
+    width: unset;
+}
+
+.preview main span div input{
+    border: none;
+    width: 100%;
+    min-width: 200px;
+    padding: 8px;
+    border-radius: 5px;
+    text-align: center;
+}
+.preview main span:first-of-type div select {
+    border: none;
+    background-color: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('../../samples/filter.png');
+    background-repeat: no-repeat;
+    background-position: 95% 50%;
+    background-size: 15px;
+    padding: 2px;
+    padding-right: 22px;
+    border: 1px solid rgba(0, 0, 0, 0.191);
+    border-radius: 6px;
+}
+
+.filterBy::before {
+    content: "Filter by:";
+    font-weight: 400;
+    margin-right: 5px;
+}
+
+.iciQ {
+    width: 100%;
+    height: 80vh;
+    text-align: center;
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    overflow: scroll;
+}
+
+.iciQ span {
+    width: 100%;
+    display: block !important;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    margin: 0 !important;
+    text-align: center;
+}
+
+.iciQ h3 {
+    padding: 2% 0;
+}
+
+.iciQ hr {
+    border: none;
+    border-top: 1px solid rgb(228, 228, 228);
+}
+
+.question {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid rgb(228, 228, 228);
+    border-radius: 10px;
+    text-align: left;
+}
+
+.question hr{
+    margin: 5px 0;
+}
+
+.question div form div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.question div form div p {
+    font-size: 0.7em;
+    color: green;
+}
+
+.question div form div input[type="text"] {
+    width: 50%;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(228, 228, 228, 0.751);
+    margin: 5px;
+}
+
+.question div form div input[type="text"]:enabled {
+    background-color: #ffffff;
+    border: 1px solid rgb(185, 185, 185);
+}
+
+.question div form div button {
+    background-color: rgb(196, 196, 196);
+    border: none;
+    padding: 5px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.question div form div button:hover {
+    background-color: rgb(140, 140, 140);
+}
+
+.btnDwn {
+    width: 100%;
+    height: 10vh;
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--bgy);
+}
+
+.btnDwn button {
+    border: none;
+    background-color: var(--bgb);
+    color: var(--bgy);
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btnDwn button:hover {
+    background-color: rgb(140, 140, 140);
+}

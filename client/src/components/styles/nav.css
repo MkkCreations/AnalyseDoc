@@ -1,0 +1,115 @@
+@import './variables.css';
+
+.navApp {
+    width: 35%;
+    max-width: 300px;
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    background-color: var(--bgb);
+}
+
+.nav {
+    width: 100%;
+    min-width: 120px;
+    height: 100vh;
+    display: flex;
+    position: sticky;
+    top: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10% 0 1%;
+}
+
+.nav span {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav span a {
+    width: 80%;
+    text-align: center;
+    color: #e5e5e5;
+    text-decoration: none;
+    padding: calc(3% + 7px);
+    border-bottom: 0.1ex solid #c7c7c733;
+}
+
+.nav span:last-of-type a:last-of-type {
+    color: rgb(181, 65, 65);
+}
+
+.nav span a:hover {
+    background-color: var(--btnbghover);
+    border-radius: 5px;
+}
+
+.active {
+    background-color: var(--btnbg) !important;
+    color: #0d0b0b !important;
+    border-radius: 5px;
+}
+
+.hamburger{
+    display: none;
+    width: 45px;
+    height: 100vh;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    padding: 20px 0;
+}
+
+.hamburger div {
+    width: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.hamburger div span {
+    width: 30px;
+    height: 3px;
+    background-color: #e5e5e5;
+    border-radius: 5px;
+    z-index: 3;
+}
+
+.hamburger figure {
+    width: 25px;
+}
+
+.hamburger figure img {
+    width: 100%;
+}
+
+.close {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+}
+.close img {
+    width: 100% !important;
+}
+
+@media screen and (max-width: 550px) {
+    .navApp {
+        width: 50px;
+    }
+    .nav {
+        display: none;
+    }
+    .hamburger {
+        display: flex;
+    }
+}

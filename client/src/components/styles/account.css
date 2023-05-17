@@ -1,0 +1,91 @@
+@import './variables.css';
+
+.account {
+    width: 100%;
+    background-color: var(--bgy);
+}
+
+.account main {
+    width: 80%;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+}
+
+.account main h2 {
+    font-weight: 400;
+    margin-bottom: 3%;
+}
+
+.account main form {
+    width: 100%;
+    min-width: 200px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background-color: rgba(255, 255, 255, 0.627);
+    padding: 6% 4%;
+    border-radius: 10px;
+}
+
+.account main form h2 {
+    width: 100%;
+    align-self: flex-start;
+    padding-left: 8%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.233);
+    padding-bottom: 1%;
+}
+
+.account main form span {
+    width: 70%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+}
+
+.account main form span:last-of-type {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.account main form span:last-of-type p {
+    font-size: 0.8em;
+    color: rgb(241, 34, 34);
+}
+
+.account main form span label {
+    font-weight: bold;
+}
+
+.account main form span input {
+    border: none;
+    width: 100%;
+    min-width: 200px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #0000004c;
+}
+
+.account main form button {
+    align-self: flex-end;
+    margin-right: 5%;
+    padding: 8px 15px;
+    border: none;
+    background-color: var(--btnbg);
+    border-radius: 4px;
+    color: aliceblue;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.account main form button:hover {
+    background-color: var(--btnbghover);
+}
