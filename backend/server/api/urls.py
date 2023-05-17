@@ -7,12 +7,12 @@ urlpatterns = [
     path('register/', RegisterUserView.as_view()),
     path('profile/', ProfileView.as_view()),
     path('questions/', QuestionView.as_view(), name='questions'),
-    path('questions/<int:id>', QuestionView.as_view(), name='questions_process'),
+    path('questions/<int:numQ>/', QuestionView.as_view(), name='questions_process'),
     path('users/', UserView.as_view(), name='users'),
     path('users/<int:id>', UserView.as_view(), name='users_process'),
     path('diligences/', DiligenceView.as_view(), name='diligences'),
     path('diligences/<int:id>', DiligenceView.as_view(), name='diligences_process'),
-    path('answers/', AnswerView.as_view(), name='answers'),
-    path('answers/<int:id>', AnswerView.as_view(), name='answers_process'),
+    path('answers/<int:id_dili>/', AnswerView.as_view(), name='answers'),
+    path('answers/', AnswerView.as_view(), name='answers_process'),
     
 ]

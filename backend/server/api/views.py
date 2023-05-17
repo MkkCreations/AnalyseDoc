@@ -3,7 +3,8 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from .models import Question, User, Diligence, Answer, Mapping
+from .models import Question, Diligence, Answer, Mapping
+from django.contrib.auth.models import User
 import json
 from datetime import datetime
 from django.contrib.auth import login, logout
@@ -29,8 +30,9 @@ class LoginView(views.APIView):
         serializer = serializers.LoginSerializer(data=self.request.data, context={ 'request': self.request })
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        
         login(request, user)
-        return Response(None, status=status.HTTP_202_ACCEPTED)
+        return Response(serializers.UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
 
 
 class LogoutView(views.APIView):
@@ -40,7 +42,7 @@ class LogoutView(views.APIView):
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 class RegisterUserView(generics.CreateAPIView):
-    
+
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -49,16 +51,19 @@ class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = serializers.RegisterSerializer
-
-
-class ProfileView(views.APIView):
     
-    permission_classes = (permissions.IsAuthenticated,)
+
+
+
+class ProfileView(generics.RetrieveAPIView):
+    
+    permission_classes = (AllowAny,) #permissions.IsAuthenticated
     authentication_classes = (SessionAuthentication,)
-    
+
     def get(self, request):
+        print(request.user)
         serializer = serializers.UserSerializer(request.user)
-        return Response({'user':serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -69,7 +74,7 @@ class QuestionView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, numQ=0):
+    def get(self, request, numQ=0):
         if numQ > 0:
             questions = list(Question.objects.filter(num_q=numQ).values())
             if len(questions) > 0:
@@ -88,7 +93,7 @@ class QuestionView(View):
     
     def post(self, request):
         jd = json.loads(request.body)
-        Question.objects.create(num_q=jd['num_q'], question=jd['question'], type=jd['type'], parent=jd['parent'])
+        Question.objects.create(num_q=jd['num_q'], question=jd['question'], type=jd['type'], parent=jd['parent'], alias=jd['alias'])
         datos={'message': 'Success'}
         return JsonResponse(datos)
     
@@ -125,8 +130,7 @@ class UserView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request):
-        print(request)
+    def get(self, request, id=0):
         jd = json.loads(request.body)
         print(jd)
         if jd['usr'] != "" and jd['pwd'] != "":
@@ -144,23 +148,32 @@ class UserView(View):
     
     def post(self, request):
         jd = json.loads(request.body)
+        print(jd)
         User.objects.create(name=jd['name'], email=jd['email'], username=jd['usr'], password=jd['pwd'], last_login=str(datetime.now()))
         datos={'message': 'Success'}
         return JsonResponse(datos)
     
-    def put(self, request, id):
-        print(request)
+    def put(self, request):
         jd = json.loads(request.body)
-        users = list(User.objects.filter(id=id).values())
+        users = list(User.objects.filter(id=jd['id']).values())
         if len(users) > 0:
-            user = User.objects.get(id=id)
-            user.name=jd['name']
+            user = User.objects.get(id=jd['id'])
+            user.firs_name=jd['first_name']
+            user.last_name=jd['last_name']
             user.email=jd['email']
-            user.username=jd['usr']
-            user.password=jd['pwd']
+            user.username=jd['username']
             user.last_login=str(datetime.now())
             user.save()
-            datos={'message': 'Success'}
+            userData = {
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'last_login': user.last_login
+            }
+            print(userData)
+            datos={'message': 'Success', 'user': userData}
         else: 
             datos={'message': 'Not found...'}
         return JsonResponse(datos)
@@ -209,19 +222,22 @@ class DiligenceView(View):
     def post(self, request):
         jd = json.loads(request.body)
         Diligence.objects.create(dili_name=jd['dili_name'], date=str(datetime.now()))
+        user = User.objects.get(id=jd['user_id'])
         newDili = list(Diligence.objects.filter(dili_name=jd['dili_name']).values())[0]
         questions = list(Question.objects.all().values())
         for question in questions:
             quest = Question.objects.get(id=question['id'])
-            Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=jd['user_id'])
+            print(quest)
+            Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=user.id)
         datos={'message': 'Success', 'diligence': newDili}
         return JsonResponse(datos)
     
-    def put(self, request, id):
+    def put(self, request):
         jd = json.loads(request.body)
-        diligences = list(Diligence.objects.filter(id=id).values())
+        print(jd)
+        diligences = list(Diligence.objects.filter(id=jd['id']).values())
         if len(diligences) > 0:
-            diligence = Diligence.objects.get(id=id)
+            diligence = Diligence.objects.get(id=jd['id'])
             diligence.dili_name=jd['dili_name']
             diligence.save()
             datos={'message': 'Success'}
@@ -239,7 +255,6 @@ class DiligenceView(View):
             datos={'message': 'Not found...'}
         return JsonResponse(datos)
 
-
 #========================================
 class AnswerView(View):
             
@@ -247,17 +262,11 @@ class AnswerView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request):
-        jd = json.loads(request.body)
-        if jd['id_dili'] != "" and not jd['id_question']:
-            answers = list(Answer.objects.filter(diligence=jd['id_dili']).values())
-            if len(answers) > 0:
-                datos={'message': 'Success', 'data': answers}
-            else:
-                datos={'message': 'Not found...'}
-            return JsonResponse(datos)
-        elif jd['id_dili'] != "" and jd['id_question'] != "":
-            answers = list(Answer.objects.filter(diligence=jd['id_dili'], question=jd['id_question']).values())
+    def get(self, request, id_dili=None):
+        print('-'*20, id_dili)
+
+        if id_dili != "":
+            answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili)
             if len(answers) > 0:
                 datos={'message': 'Success', 'data': answers}
             else:
@@ -277,12 +286,14 @@ class AnswerView(View):
         datos={'message': 'Success'}
         return JsonResponse(datos)
             
-    def put(self, question, diligence, answer, answer_type):
-        answers = list(Answer.objects.filter(diligence_id=diligence, question_id=question).values())
+    def put(self, request):
+        jd = json.loads(request.body)
+        print(jd)
+        answers = list(Answer.objects.filter(diligence_id=jd['id_dili'], question_id=jd['id_q']).values())
         if len(answers) > 0:
-            ans = Answer.objects.get(diligence_id=diligence, question_id=question)
-            ans.answer=answer
-            ans.answer_type=answer_type
+            ans = Answer.objects.get(diligence_id=jd['id_dili'], question_id=jd['id_q'])
+            ans.answer=jd['answer']
+            ans.answer_type=jd['answer_type']
             ans.save()
             datos={'message': 'Success'}
         else: 

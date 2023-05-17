@@ -42,17 +42,11 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'last_login',
-        ]
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'last_login')
+        
         
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
@@ -75,6 +69,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
     def create(self, validated_data):
+        print(validated_data)
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -84,3 +79,4 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
