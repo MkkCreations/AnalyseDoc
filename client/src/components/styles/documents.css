@@ -16,7 +16,7 @@
     color: var(--bgb);
 }
 
-.documents main a {
+.documents  main  a {
     text-decoration: none;
     color: var(--bgb);
 }
@@ -37,7 +37,7 @@
     align-items: center;
 }
 
-.documents main span a {
+/* .documents main span a {
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -50,7 +50,7 @@
     width: 1em;
     font-size: 2.2em;
     font-weight: 300;
-}
+} */
 
 .documents main span a:hover {
     color: rgb(11, 93, 156);
@@ -133,7 +133,7 @@
     flex-wrap: wrap;
 }
 
-.docs > div:last-of-type article div p {
+.docs > div:last-of-type article div p, .docSettings a {
     color: #a2a2a2 !important;
     font-size: 0.8em;
 }
@@ -168,16 +168,35 @@
     z-index: 2;
 }
 
-.docSettings p {
+.docSettings > p , .docSettings > a{
+    text-decoration: none;
     text-align: center;
     padding: 5px 15px;
     border-radius: 6px;
     background-color: rgba(18, 18, 18, 0.88);
 }
 
-.docSettings p:hover {
+.docSettings p:hover, .docSettings a:hover {
     background-color: rgb(0, 0, 0);
     cursor: pointer;
+}
+
+.docSettings a::before {
+    content: '';
+    background-image: url('../../samples/download.png');
+    background-repeat: no-repeat;
+    background-position: 5% 50%;
+    background-size: 10px;
+    padding-left: 15px;
+}
+
+
+.docLink {
+    cursor: pointer;
+}
+
+.docLink:hover {
+    color: rgb(11, 93, 156);
 }
 
 .doc embed {

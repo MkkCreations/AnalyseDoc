@@ -3,19 +3,19 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from .models import Question, Diligence, Answer, Mapping
+from .models import Question, Diligence, Answer, Mapping, Document
 from django.contrib.auth.models import User
 import json
 from datetime import datetime
 from django.contrib.auth import login, logout
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework import status
-from rest_framework import views
+from rest_framework import generics, permissions, status, views, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from . import serializers
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.http import HttpResponse
+import os
+from django.http import FileResponse
 
 # Create your views here.
 
@@ -24,7 +24,6 @@ class LoginView(views.APIView):
     # This view should be accessible also for unauthenticated users.
     
     permission_classes = (permissions.AllowAny,)
-    authentication_classes = ()
 
     def post(self, request, format=None):
         serializer = serializers.LoginSerializer(data=self.request.data, context={ 'request': self.request })
@@ -53,12 +52,9 @@ class RegisterUserView(generics.CreateAPIView):
     serializer_class = serializers.RegisterSerializer
     
 
-
-
 class ProfileView(generics.RetrieveAPIView):
     
-    permission_classes = (AllowAny,) #permissions.IsAuthenticated
-    authentication_classes = (SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,) #permissions.IsAuthenticated
 
     def get(self, request):
         print(request.user)
@@ -250,6 +246,7 @@ class DiligenceView(View):
         diligences = list(Diligence.objects.filter(id=id).values())
         if len(diligences) > 0:
             Diligence.objects.filter(id=id).delete()
+            os.remove('media/{path}'.format(path=id))
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}
@@ -312,6 +309,76 @@ class AnswerView(View):
             datos={'message': 'Not found...'}
         return JsonResponse(datos)
             
+
+
+#========================================
+class DocumentView(views.APIView):
+    
+    parser_class = (MultiPartParser, FormParser,)
+    permission_classes = (AllowAny,)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+    
+    
+    def get(self, request, id_dili=0, id_doc=0):
+        if id_dili > 0 and id_doc == 0:
+            documents = list(Document.objects.filter(diligence=id_dili).values())
+            if len(documents) > 0:
+                document = documents
+                print(document)
+                serializer = serializers.DocumentSerializer2(document, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Not found...'}, status=status.HTTP_204_NO_CONTENT)
+        elif id_dili > 0 and id_doc > 0:
+            documents = list(Document.objects.filter(id=id_doc).values())
+            if len(documents) > 0:
+                document = documents[0]
+                path = document['document']
+                print(path)
+                with open('media/{path}'.format(path=path), 'rb') as pdf:
+                    response = HttpResponse(pdf.read(), content_type='application/pdf')
+                    response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
+                    return response
+            else:
+                return Response({'message': 'Not found...'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'Not found...'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    def post(self, request, *args, **kwargs):
+        post_serializer = serializers.DocumentSerializer(data=request.data)
+        print(post_serializer.is_valid())
+        if post_serializer.is_valid():
+            post_serializer.save()
+            return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
+        return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
+    
+    
+    def put(self, request):
+        jd = json.loads(request.body)
+        documents = list(Document.objects.filter(id=jd['id']).values())
+        if len(documents) > 0:
+            document = Document.objects.get(id=jd['id'])
+            document.name=jd['name']
+            document.url=jd['url']
+            document.save()
+            datos={'message': 'Success'}
+        else: 
+            datos={'message': 'Not found...'}
+        return JsonResponse(datos) 
+    
+    def delete(self, request, id_dili, id_doc):
+        documents = list(Document.objects.filter(id=id_doc).values())
+        if len(documents) > 0:
+            Document.objects.filter(id=id_doc).delete()
+            os.remove('media/{path}'.format(path=documents[0]['document']))
+            datos={'message': 'Success'}
+        else:
+            datos={'message': 'Not found...'}
+        return JsonResponse(datos)
 
 
 #========================================

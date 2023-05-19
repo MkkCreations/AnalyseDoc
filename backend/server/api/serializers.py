@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import User
+from .models import Document
 
 class LoginSerializer(serializers.Serializer):
     """
@@ -80,3 +81,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ('name', 'document', 'user', 'docType', 'diligence')
+        
+class DocumentSerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ('id', 'name', 'document', 'user_id', 'docType', 'diligence_id', 'date')

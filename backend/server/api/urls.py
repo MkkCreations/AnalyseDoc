@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import QuestionView, UserView, DiligenceView, AnswerView, LoginView, LogoutView, ProfileView, RegisterUserView
+from .views import QuestionView, UserView, DiligenceView, AnswerView, LoginView, LogoutView, ProfileView, RegisterUserView, DocumentView
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('login/', LoginView.as_view()),
@@ -14,5 +17,6 @@ urlpatterns = [
     path('diligences/<int:id>', DiligenceView.as_view(), name='diligences_process'),
     path('answers/<int:id_dili>/', AnswerView.as_view(), name='answers'),
     path('answers/', AnswerView.as_view(), name='answers_process'),
-    
-]
+    path('documents/', DocumentView.as_view(), name='documents'),
+    path('documents/<int:id_dili>/<int:id_doc>/', DocumentView.as_view(), name='documents_process'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

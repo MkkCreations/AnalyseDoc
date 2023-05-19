@@ -11,7 +11,7 @@ function Login() {
         usr: "",
         pwd: ""
     });
-    const {login, user, setUser, profile} = useAuth();
+    const {login, user, setUser} = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState("");
     const handleChange = (e) => {
@@ -34,7 +34,6 @@ function Login() {
         }
         try {
             await login(data);
-            await profile(data.username);
             navigate('/projects');
         } catch (error) {
             setError(error.message);

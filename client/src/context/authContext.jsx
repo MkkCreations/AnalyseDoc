@@ -8,9 +8,6 @@ export const useAuth = () => {
     return context;
 }
 
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
 
 const client = axios.create({
     baseURL: 'http://127.0.0.1:8000/api/',
@@ -38,13 +35,6 @@ export function AuthProvider({children}) {
             });
     }
 
-    const profile = async (username) => {
-        await  client.get('profile/')
-            .then(res => {
-                console.log(res);
-            })
-    }
-
     const logout = () => {
         if (!user.loged) return console.log("User is not loged");
         return client.post('logout/')
@@ -59,7 +49,7 @@ export function AuthProvider({children}) {
     }
 
     return (
-        <authContext.Provider value={{login,logout, user, setUser, signup, profile}}>
+        <authContext.Provider value={{login,logout, user, setUser, signup}}>
             {children}
         </authContext.Provider>
     )

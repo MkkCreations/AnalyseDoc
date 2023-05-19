@@ -3,6 +3,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class User(models.Model):
     email = models.CharField(max_length=32, unique=True)
     name = models.CharField(max_length=32)
@@ -39,3 +40,14 @@ class Mapping(models.Model):
     num_map = models.CharField(max_length=32, primary_key=True, unique=True)
     num_q = models.ForeignKey(Question, on_delete=models.CASCADE)
     
+
+def upload_to(instance, filename):
+    return 'documents/{diligence}/{filename}'.format(filename=filename, diligence=instance.diligence.id)
+
+class Document(models.Model):
+    name = models.CharField(max_length=32, unique=True)
+    document = models.FileField(upload_to=upload_to)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    docType = models.CharField(max_length=32, null=True)
+    diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=True)

@@ -7,9 +7,10 @@ import Header from './header';
 import { Question } from './model/Question';
 
 function Preview() {
-    const {user, setUser} = useAuth();
+    const {user} = useAuth();
     const [questions, setQuestions] = useState({});
     const [edit, setEdit] = useState(false);
+
 
     const fetchQuestions = async () => {
         try {
