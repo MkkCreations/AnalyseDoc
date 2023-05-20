@@ -37,21 +37,6 @@
     align-items: center;
 }
 
-/* .documents main span a {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    margin-left: 2%;
-    color: rgb(26, 26, 26);
-}
-.documents main span a::before {
-    content: "+";
-    display: inline;
-    width: 1em;
-    font-size: 2.2em;
-    font-weight: 300;
-} */
-
 .documents main span a:hover {
     color: rgb(11, 93, 156);
 }
@@ -198,7 +183,12 @@
 .docLink:hover {
     color: rgb(11, 93, 156);
 }
-
+.doc {
+    background-color: #767676;
+    align-self: stretch;
+    border-radius: 15px;
+    justify-content: center;
+}
 .doc embed {
     min-height: 300px;
     border-radius: 10px;

@@ -1,11 +1,11 @@
 import './styles/newDoc.css';
 import { useState } from 'react';
 import { useAuth } from '../context/authContext';
-import axios from 'axios';
+import { c } from 'docker/src/languages';
 
-function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
-    const {user} = useAuth();
-    const [docsType, setDocsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "Other"]);
+function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
+    const {user, client} = useAuth();
+    const [docsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "Other"]);
     const [doc, setDoc] = useState({
         user: user.data.id,
         dili: user.dili.id,
@@ -25,9 +25,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
 
     const handleFile = (e) => {
         if (!e.target.files) return;
-        
         const file = e.target.files[0];
-
         setDoc({
             ...doc,
             file: file
@@ -39,6 +37,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
         if (!doc.name || !doc.file || !doc.date) {
             setError("All fields are required");
         }
+        if (edit) return APIDocument(doc);
 
         let formData = new FormData();
         formData.append("document", doc.file, doc.file.name);
@@ -68,29 +67,21 @@ function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
         }
         
         try {
-            /* if(edit) {
-                await axios.put('http://')
-            } else { */
-                await axios.post('http://127.0.0.1:8000/api/documents/', data, axiosConfig )
+            if(edit) {
+                await client.put('documents/', {id: docData.id, name: data.name, docType: data.docType? data.docType: docData.docType, document: data.file? data.file: docData.document})
+                    .then(res => {
+                        console.log(res);
+                    });
+            } else {
+                await client.post('documents/', data, axiosConfig )
                     .then(res => {
                         console.log(res);
                     })
-
+            }
             setNewDoc(false);
         } catch (error) {
             console.log(error);
             setError(error.message);
-        }
-    }
-
-    const downloadDoc = async (id) => {
-        try {
-            await axios.get(`http://127.0.0.1:8000/api/documents/${user.dili.id}/${id}/`)
-                .then(res => {
-                    console.log(res);
-                })
-        } catch (error) {
-            console.log(error);
         }
     }
 
@@ -100,21 +91,22 @@ function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
             <div className='newDoc'>
                 {edit? <h2>Edit document</h2> : <h2>New docuemnt</h2>}
                 <form onSubmit={handleSubmit}>
-                    {error?<p style={{color: 'red'}}>{error}</p> : ''}
-                    {edit? <h5>Actuale: <b>{docData[1]}</b></h5>:''}
-                    <select name="docType" id="docType" onChange={handleChange}  required>
-                        <option value="" disabled selected>Document type</option>
+                    {error?<p style={{color: 'red !important'}}>{error}</p> : ''}
+                    {edit? <h5>Actuale: <b>{docData.name}</b></h5>:''}
+                    <select name="docType" id="docType" onChange={handleChange} required>
+                        <option value="" disabled>Document type</option>
                         {
                             docsType.map((docType, index) => {
-                                if (edit && docType === docData[2]) {
+                                if (edit && docType === docData.docType) {
                                     return <option value={docType} key={index} selected>{docType}</option>
-                                }
+                                } 
                                 if (docs) {
                                     for (const key in docs) {
-                                        if (docs[key].docType !== docType) {
-                                            return <option value={docType} key={index}>{docType}</option>
+                                        if (docType === docs[key].docType) {
+                                            return '';
                                         }
                                     }
+                                    return <option value={docType} key={index}>{docType}</option>
                                 } else {
                                     return <option value={docType} key={index}>{docType}</option>
                                 }
@@ -122,7 +114,9 @@ function NewDoc({setNewDoc, edit=false, docs, docData={}}) {
                         }
                     </select>
                     <input type="text" name='name' placeholder="Nom de document" onChange={handleChange} required />
-                    <input type="file" name="file" id="inpFile" onChange={handleFile} required />
+                    {
+                        !edit? <input type="file" name="file" id="inpFile" onChange={handleFile} required/>: <input type="file" name="file" id="inpFile" onChange={handleFile} />
+                    }
                     <span>
                         <p onClick={() => {setNewDoc(false)}}>Annuler</p>
                         <button>Valider</button>

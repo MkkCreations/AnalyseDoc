@@ -22,7 +22,6 @@ export function AuthProvider({children}) {
         dili: ''
     });
 
-    /* For Django Server */
     const login =  (data) => {
         if (user.loged) return console.log("User is already loged");
         return client.post('login/', data)
@@ -49,7 +48,7 @@ export function AuthProvider({children}) {
     }
 
     return (
-        <authContext.Provider value={{login,logout, user, setUser, signup}}>
+        <authContext.Provider value={{login,logout, user, setUser, signup, client}}>
             {children}
         </authContext.Provider>
     )

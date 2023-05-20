@@ -2,27 +2,23 @@ import './styles/preview.css';
 import { useAuth } from '../context/authContext';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import Header from './header';
 import { Question } from './model/Question';
 
 function Preview() {
-    const {user} = useAuth();
+    const {user, client} = useAuth();
     const [questions, setQuestions] = useState({});
     const [edit, setEdit] = useState(false);
 
-
     const fetchQuestions = async () => {
         try {
-            await axios.get(`http://127.0.0.1:8000/api/answers/${user.dili.id}`)
+            await client.get(`answers/${user.dili.id}`)
                 .then(res => {
-                    console.log(res.data.data);
                     for (const key in res.data.data) {
                         const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
-                    console.log(questions);
             })
         } catch (error) {
             console.log(error);
@@ -102,7 +98,7 @@ function Preview() {
 
     const putAnswer = async (answer) => {
         try {
-            await axios.put('http://127.0.0.1:8000/api/answers/', answer)
+            await client.put('answers/', answer)
         } catch (error) {
             console.log(error);
         }
@@ -136,32 +132,6 @@ function Preview() {
                         <h3>I.C.I Review</h3>
                         <hr />
                     </span>
-                    {/* <div>
-                       {Object.keys(ici).map(key => {
-                            return <div key={key}>
-                                <h4>{key} {ici[key][0][0]}</h4>
-                                <div>
-                                    <form onChange={(e)=>handleChange(key,e)}>
-                                        {ici[key][0][1] === 'R' ?
-                                            <div> 
-                                                <div>{ici[key][1][0]}</div>
-                                                <label>Yes</label>
-                                                <input type='radio' name={key} value={'yes'} />
-                                                <label>No</label>
-                                                <input type='radio' name={key} value={'no'} />
-                                            </div>
-                                            : 
-                                            <div>
-                                                <input type='text' name={key[2]} disabled={true} />
-                                                <button onClick={handleDisable}>Edit</button>
-                                            </div>
-                                        }
-                                    </form>
-                                </div>
-                            </div>
-                          })
-                       }
-                    </div> */}
                     <div>
                        {Object.keys(questions).map(key => {
                             return <div className='question' key={key}>

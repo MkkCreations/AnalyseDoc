@@ -128,7 +128,6 @@ class UserView(View):
     
     def get(self, request, id=0):
         jd = json.loads(request.body)
-        print(jd)
         if jd['usr'] != "" and jd['pwd'] != "":
             users = list(User.objects.filter(username=jd['usr'], password=jd['pwd']).values())
             if len(users) > 0:
@@ -144,7 +143,6 @@ class UserView(View):
     
     def post(self, request):
         jd = json.loads(request.body)
-        print(jd)
         User.objects.create(name=jd['name'], email=jd['email'], username=jd['usr'], password=jd['pwd'], last_login=str(datetime.now()))
         datos={'message': 'Success'}
         return JsonResponse(datos)
@@ -168,7 +166,6 @@ class UserView(View):
                 'last_name': user.last_name,
                 'last_login': user.last_login
             }
-            print(userData)
             datos={'message': 'Success', 'user': userData}
         else: 
             datos={'message': 'Not found...'}
@@ -223,14 +220,12 @@ class DiligenceView(View):
         questions = list(Question.objects.all().values())
         for question in questions:
             quest = Question.objects.get(id=question['id'])
-            print(quest)
             Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=user.id)
         datos={'message': 'Success', 'diligence': newDili}
         return JsonResponse(datos)
     
     def put(self, request):
         jd = json.loads(request.body)
-        print(jd)
         diligences = list(Diligence.objects.filter(id=jd['id']).values())
         if len(diligences) > 0:
             diligence = Diligence.objects.get(id=jd['id'])
@@ -260,8 +255,6 @@ class AnswerView(View):
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, id_dili=None):
-        print('-'*20, id_dili)
-
         if id_dili != "":
             answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili)
             if len(answers) > 0:
@@ -285,7 +278,6 @@ class AnswerView(View):
             
     def put(self, request):
         jd = json.loads(request.body)
-        print(jd)
         answers = list(Answer.objects.filter(diligence_id=jd['id_dili'], question_id=jd['id_q']).values())
         if len(answers) > 0:
             ans = Answer.objects.get(diligence_id=jd['id_dili'], question_id=jd['id_q'])
@@ -327,7 +319,6 @@ class DocumentView(views.APIView):
             documents = list(Document.objects.filter(diligence=id_dili).values())
             if len(documents) > 0:
                 document = documents
-                print(document)
                 serializer = serializers.DocumentSerializer2(document, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
@@ -337,7 +328,6 @@ class DocumentView(views.APIView):
             if len(documents) > 0:
                 document = documents[0]
                 path = document['document']
-                print(path)
                 with open('media/{path}'.format(path=path), 'rb') as pdf:
                     response = HttpResponse(pdf.read(), content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
@@ -350,7 +340,6 @@ class DocumentView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         post_serializer = serializers.DocumentSerializer(data=request.data)
-        print(post_serializer.is_valid())
         if post_serializer.is_valid():
             post_serializer.save()
             return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
@@ -359,11 +348,17 @@ class DocumentView(views.APIView):
     
     def put(self, request):
         jd = json.loads(request.body)
+        print(jd)
         documents = list(Document.objects.filter(id=jd['id']).values())
         if len(documents) > 0:
             document = Document.objects.get(id=jd['id'])
             document.name=jd['name']
-            document.url=jd['url']
+            document.docType=jd['docType']
+            try:
+                print(request.FILES['document'])
+                document.document=request.FILES['document']
+            except:
+                pass
             document.save()
             datos={'message': 'Success'}
         else: 
