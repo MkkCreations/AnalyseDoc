@@ -254,14 +254,23 @@ class AnswerView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request, id_dili=None):
-        if id_dili != "":
+    def get(self, request, id_dili=None, doc_id=0):
+        if id_dili != "" and doc_id == 0:
             answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili)
             if len(answers) > 0:
                 datos={'message': 'Success', 'data': answers}
             else:
                 datos={'message': 'Not found...'}
             return JsonResponse(datos)
+        elif id_dili != "" and doc_id != "":
+            answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili, doc_id=doc_id)
+            if len(answers) > 0:
+                answer = answers
+                datos={'message': 'Success', 'data': answer}
+                return JsonResponse(datos)
+            else:
+                datos={'message': 'Not found...'}
+                return JsonResponse(datos)
         else:
             datos={'message': 'Not found...'}
             return JsonResponse(datos)

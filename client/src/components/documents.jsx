@@ -11,7 +11,7 @@ function Documents() {
     const {user, client} = useAuth();
     const [docs, setDocs] = useState([{}]);
     const [newDoc, setNewDoc] = useState(false);
-    const [selectedDoc, setSelectedDoc] = useState();
+    const [selectedDoc, setSelectedDoc] = useState({});
 
     const getDocs = async () => {
         try {
@@ -57,15 +57,15 @@ function Documents() {
                         <div>
                             { docs[0] === undefined? <center><p>No documents</p></center>:
                                 docs.map(doc => {
-                                    return <section className='docLink' onClick={() => {handleShowDoc(doc)}} ><DocField doc={doc} key={doc.id} getDocs={getDocs} setSelectedDoc={setSelectedDoc} docs={docs}/></section>
+                                    return <section className='docLink' /* onClick={() => {handleShowDoc(doc)}} */ ><DocField doc={doc} key={doc.id} getDocs={getDocs} setSelectedDoc={setSelectedDoc} docs={docs}/></section>
                                 })
                             }
                         </div>
                     </span>
                     <span className='doc'>
-                        {
+                        {   console.log(selectedDoc)}{
                             !selectedDoc? <center><p>No document selected</p></center>:
-                            <Questions docType={selectedDoc} />
+                            <Questions doc={selectedDoc} />
                         }
                     </span>
                 </section>
@@ -103,7 +103,7 @@ function DocField({doc, getDocs, setSelectedDoc, docs}) {
 
     return (
         <article key={doc.id}>
-            <div onClick={() => {setSelectedDoc(doc.docType)}}>
+            <div onClick={() => {console.log(doc);setSelectedDoc(doc)}}>
                 <span style={{display: !editDoc?'none': 'unset'}}><NewDoc setNewDoc={setEditDoc} edit={true} docData={doc} /></span>
                 <h5>{doc.docType}</h5>
                 <p>{doc.name}</p>
@@ -124,28 +124,26 @@ function DocField({doc, getDocs, setSelectedDoc, docs}) {
 }
 
 
-function Questions(docType) {
+function Questions(doc) {
     const {user, client} = useAuth();
     const [edit, setEdit] = useState(false);
     const [questions, setQuestions] = useState({});
 
-    const fetchQuestions = async (docType) => {
+    const fetchQuestions = async () => {
         try {
-            console.log(docType.docType);
-            await client.get(`answers/${user.dili.id}/${docType.docType}/`)
+            await client.get(`answers/${user.dili.id}/${doc.doc.id}`)
                 .then(res => {
-                    console.log(res);
                     for (const key in res.data.data) {
                         const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
-                    console.log(questions);
-                });
+                })
         } catch (error) {
             console.log(error);
         }
     }
+
 
     const handleChange = (key, e) => {
         console.log(e.target.value);
@@ -161,12 +159,16 @@ function Questions(docType) {
     }
 
     useEffect(() => {
-        fetchQuestions(docType);
-    }, [edit, setEdit, docType])
+        if (doc.doc.id !== undefined) {
+            fetchQuestions();
+        }
+        setQuestions({});
+    }, [edit, setEdit, doc, setQuestions])
 
 
     return (
         <div>
+            <center><h2>{doc.doc.docType}</h2></center>
             {Object.keys(questions).map(key => {
                 return <div className='question' key={key}>
                     <h4>{questions[key].getNumQ()}  {questions[key].getQuestion()}</h4>

@@ -22,9 +22,14 @@ class Diligence(models.Model):
     dili_name = models.CharField(max_length=32, unique=True)
     date = models.DateTimeField(auto_now=True)
     
-    def get_questions_answers(self, dili) -> Any:
+    def get_questions_answers(self, dili, doc_id=None) -> Any:
         questions = {}
-        for answer in Answer.objects.filter(diligence=dili):
+        if doc_id is None:
+            answers = Answer.objects.filter(diligence=dili)
+        else:
+            doc_type = Document.objects.get(id=doc_id).docType
+            answers = Answer.objects.filter(diligence=dili, answer_type=doc_type)
+        for answer in answers:
             questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type}]
         return questions
     

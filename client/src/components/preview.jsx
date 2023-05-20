@@ -12,7 +12,7 @@ function Preview() {
 
     const fetchQuestions = async () => {
         try {
-            await client.get(`answers/${user.dili.id}`)
+            await client.get(`answers/${user.dili.id}/0`)
                 .then(res => {
                     for (const key in res.data.data) {
                         const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type);
