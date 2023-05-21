@@ -348,6 +348,7 @@ class DocumentView(views.APIView):
     
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         post_serializer = serializers.DocumentSerializer(data=request.data)
         if post_serializer.is_valid():
             post_serializer.save()

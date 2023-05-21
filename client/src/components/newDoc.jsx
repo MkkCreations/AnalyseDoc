@@ -94,7 +94,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
                     {error?<p style={{color: 'red !important'}}>{error}</p> : ''}
                     {edit? <h5>Actuale: <b>{docData.name}</b></h5>:''}
                     <select name="docType" id="docType" onChange={handleChange} required>
-                        <option value="" disabled>Document type</option>
+                        <option value="" disabled selected>Document type</option>
                         {
                             docsType.map((docType, index) => {
                                 if (edit && docType === docData.docType) {

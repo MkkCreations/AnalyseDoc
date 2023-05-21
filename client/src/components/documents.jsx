@@ -11,7 +11,7 @@ function Documents() {
     const {user, client} = useAuth();
     const [docs, setDocs] = useState([{}]);
     const [newDoc, setNewDoc] = useState(false);
-    const [selectedDoc, setSelectedDoc] = useState({});
+    const [selectedDoc, setSelectedDoc] = useState();
 
     const getDocs = async () => {
         try {
@@ -63,7 +63,7 @@ function Documents() {
                         </div>
                     </span>
                     <span className='doc'>
-                        {   console.log(selectedDoc)}{
+                        {
                             !selectedDoc? <center><p>No document selected</p></center>:
                             <Questions doc={selectedDoc} />
                         }
@@ -103,7 +103,7 @@ function DocField({doc, getDocs, setSelectedDoc, docs}) {
 
     return (
         <article key={doc.id}>
-            <div onClick={() => {console.log(doc);setSelectedDoc(doc)}}>
+            <div onClick={() => {setSelectedDoc(doc)}}>
                 <span style={{display: !editDoc?'none': 'unset'}}><NewDoc setNewDoc={setEditDoc} edit={true} docData={doc} /></span>
                 <h5>{doc.docType}</h5>
                 <p>{doc.name}</p>
@@ -159,10 +159,10 @@ function Questions(doc) {
     }
 
     useEffect(() => {
+
         if (doc.doc.id !== undefined) {
             fetchQuestions();
         }
-        setQuestions({});
     }, [edit, setEdit, doc, setQuestions])
 
 
