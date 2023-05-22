@@ -80,6 +80,8 @@ function Projects() {
     )
 }
 
+
+
 function Diligence({diligence, fetchDiligences}) {
     const {user, setUser} = useAuth();
     const [settings, setSettings] = useState(false);

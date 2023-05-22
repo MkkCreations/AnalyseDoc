@@ -21,7 +21,7 @@ export function AuthProvider({children}) {
         data: [],
         dili: ''
     });
-
+    
     const login =  (data) => {
         if (user.loged) return console.log("User is already loged");
         return client.post('login/', data)

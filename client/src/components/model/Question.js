@@ -90,6 +90,4 @@ export class Question {
         this.idAnswer = idAnswer;
     }
 
-
-
 }

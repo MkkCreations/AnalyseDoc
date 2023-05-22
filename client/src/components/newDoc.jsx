@@ -1,7 +1,7 @@
 import './styles/newDoc.css';
 import { useState } from 'react';
 import { useAuth } from '../context/authContext';
-import { c } from 'docker/src/languages';
+
 
 function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
     const {user, client} = useAuth();
