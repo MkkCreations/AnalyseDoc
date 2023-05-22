@@ -1,5 +1,6 @@
 import os
 import json
+from pypdf import PdfReader, PdfWriter
 from trp.t_pipeline import pipeline_merge_tables
 import trp.trp2 as t2
 from textractcaller.t_call import call_textract, Textract_Features, Textract_Types
@@ -22,23 +23,7 @@ import re
 textract_client = boto3.client("textract")
 
 
-def CustomTableDetectionFunction(t_document):
-    table_ids_merge_list = []
-    table_id_pairs = []
-    trp_doc = Document(TDocumentSchema().dump(t_document))
-    for current_page in trp_doc.pages:
-        if len(current_page.tables) == 0:
-            break
-        for table in current_page.tables:
-            table_id_pairs.append(table.id)
-            if len(table_id_pairs) > 1:
-                table_ids_merge_list.append(table_id_pairs.copy())
-                table_id_pairs.clear()
-    return table_ids_merge_list
-
-
 def uploadS3(s3BucketName, documentName, diligenceId, documentType):
-    print(documentName)
     s3 = boto3.client("s3")
     s3.upload_file(
         Filename=documentName,
@@ -81,15 +66,25 @@ def PrettyPrintTables(textract_json):
             display(df)
 
 
-def split_pdf(file, s3BucketName, docWolfsbergumentType, diligenceId):
-    inputpdf = PdfReader(open(file, "rb"))
+def split_pdf_and_process_tables(file, s3BucketName, diligenceId, documentType):
+    inputpdf = PdfReader(open(file, "rb"), strict=False)
+    array_of_questions_answer = []
     for i in range(len(inputpdf.pages)):
         output = PdfWriter()
         output.add_page(inputpdf.pages[i])
         with open(f"{i}.pdf", "wb") as outputStream:
             output.write(outputStream)
             uploadS3(s3BucketName, f"{i}.pdf", diligenceId, documentType)
-            outputQueries(s3BucketName, f"{i}.pdf", diligenceId, documentType)
+            textract_json = get_kv_map(
+                s3BucketName, f"{i}.pdf", diligenceId, documentType
+            )
+            csv_table_formatted = get_string(
+                textract_json=textract_json,
+                table_format=Pretty_Print_Table_Format.csv,
+                output_type=[Textract_Pretty_Print.TABLES],
+            )
+            array_of_questions_answer.append(csv_table_formatted)
+    return array_of_questions_answer
 
 
 def format_wolfsberg_as_dict(wolfsberg_data):
@@ -105,13 +100,22 @@ def format_wolfsberg_as_dict(wolfsberg_data):
                 "Answer": values[2].strip() if len(values) > 2 else "",
             }
             objects.append(obj)
+
+    for item in objects:
+        print(item)
+
     return objects
 
 
-def search_for_wolfsberg_answer(wolfsberg_data, question_number):
+def search_for_wolfsberg_answer(
+    wolfsberg_data, wolfsberg_question_number, ICI_question_number
+):
     for item in wolfsberg_data:
-        if item["No"] == question_number:
-            return item["Answer"]
+        if item["No"] == wolfsberg_question_number:
+            return {
+                "ICI_id": ICI_question_number,
+                "Answer": item["Answer"],
+            }
     return None
 
 
@@ -120,6 +124,7 @@ def main():
     documentName = "./documents/BNP-WOLFSBERG-1-3.pdf"
     documentType = "WOLFSBERG"
     diligenceId = "1"
+
     uploadS3(s3BucketName, documentName, diligenceId, documentType)
     textract_json = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
     csv_table_formatted = get_string(
@@ -129,7 +134,6 @@ def main():
     )
     array_of_questions_answer = csv_table_formatted.split("\r\n")
     wolfsberg_data = format_wolfsberg_as_dict(array_of_questions_answer)
-    print(search_for_wolfsberg_answer(wolfsberg_data, "5"))
 
 
 main()
