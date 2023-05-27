@@ -116,10 +116,13 @@ def search_for_wolfsberg_answer(
     for item in wolfsberg_data:
         if item["No"] == wolfsberg_question_number:
             return {
-                "ICI_id": ICI_question_number,
-                "Answer": item["Answer"],
+                "no_ici": ICI_question_number,
+                "answer": item["Answer"],
             }
     return None
+
+
+# def setup_formatted_data(wolfsberg_data, wolfsberg_to_ici_data)
 
 
 def main():
@@ -127,6 +130,7 @@ def main():
     documentName = "./documents/BNP-WOLFSBERG-1-3.pdf"
     documentType = "WOLFSBERG"
     diligenceId = "1"
+    wolfsberg_to_ici_data = [{"wolfsberg": "1.1", "ici": "1.1.1"}]
 
     uploadS3(s3BucketName, documentName, diligenceId, documentType)
     textract_json = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
