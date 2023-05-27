@@ -1,6 +1,7 @@
 import trp.trp2 as t2
 import time
 import boto3
+import os
 
 tempo = time.time()
 
@@ -97,12 +98,12 @@ chiffre_cles = [
 
 
 def uploadS3(s3BucketName, documentName, diligenceId, documentType):
-    print(documentName)
+    docName = documentName.split("/")[-1]
     s3 = boto3.client("s3")
     s3.upload_file(
         Filename=documentName,
         Bucket=s3BucketName,
-        Key=str(diligenceId + "/" + documentType + "/" + documentName),
+        Key='{diligenceId}/{documentType}/{docName}'.format(diligenceId=diligenceId, documentType=documentType, docName=docName),
     )
 
 
@@ -130,7 +131,7 @@ def format_queries_as_dict(question_number, answer):
     }
 
 
-def split_pdf(file, s3BucketName, documentType, diligenceId):
+""" def split_pdf(file, s3BucketName, documentType, diligenceId):
     inputpdf = PdfReader(open(file, "rb"))
     for i in range(len(inputpdf.pages)):
         output = PdfWriter()
@@ -139,15 +140,16 @@ def split_pdf(file, s3BucketName, documentType, diligenceId):
             output.write(outputStream)
         uploadS3(s3BucketName, f"{i}.pdf", diligenceId, documentType)
         outputQueries(s3BucketName, f"{i}.pdf", diligenceId, documentType)
-
+ """
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
+    print("client: ", client)
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
                 "Bucket": s3BucketName,
-                "Name": str(diligenceId + "/" + documentType + "/" + documentName),
+                "Name": f'{diligenceId}/{documentType}/{documentName}',
             }
         },
         FeatureTypes=["QUERIES"],
@@ -172,19 +174,17 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 # <<<<==================>>> Main <<<==================>>>>
 
 
-def __init__():
-    s3BucketName = "inputanalyze"
-    documentName = "./documents/BNP-WOLFSBERG.pdf"
-    documentType = "WOLFSBERG"
-    diligenceId = "1"
+def main(path, documentType, diligenceId):
+    print('main:', path, documentType, diligenceId)
+    s3BucketName = "s3analysedoc"
+    documentPath = os.path.realpath('.')+'{path}'.format(path=path)
     res = []
 
-    uploadS3(s3BucketName, documentName, diligenceId, documentType)
-    outputQueries(s3BucketName, documentName, diligenceId, documentType, res)
+    uploadS3(s3BucketName, documentPath, diligenceId, documentType)
+    print("Uploaded to S3", "-"*20)
+    outputQueries(s3BucketName, documentPath, diligenceId, documentType, res)
     print(res)
     tempo2 = time.time()
     print(tempo2 - tempo)
 
 
-if __name__ == "__main__":
-    __init__()

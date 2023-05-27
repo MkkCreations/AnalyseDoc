@@ -15,7 +15,7 @@ from . import serializers
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 import os
-from django.http import FileResponse
+from TextractQueries.find_queries_kv import main
 
 # Create your views here.
 
@@ -349,10 +349,14 @@ class DocumentView(views.APIView):
     
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         post_serializer = serializers.DocumentSerializer(data=request.data)
         if post_serializer.is_valid():
             post_serializer.save()
+            path = post_serializer.data.get('document')
+            doc_type = post_serializer.data.get('docType')
+            diligence_id = post_serializer.data.get('diligence')
+            print(path, doc_type, diligence_id)
+            main(path, doc_type, diligence_id)
             return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
         return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
     
@@ -380,7 +384,7 @@ class DocumentView(views.APIView):
         documents = list(Document.objects.filter(id=id_doc).values())
         if len(documents) > 0:
             Document.objects.filter(id=id_doc).delete()
-            os.remove('media/{path}'.format(path=documents[0]['document']))
+            os.remove('TextractQueries/media/{path}'.format(path=documents[0]['document']))
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}

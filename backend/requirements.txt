@@ -1,7 +1,11 @@
 amazon_textract_caller==0.0.29
 amazon_textract_prettyprinter==0.1.2
+amazon_textract_response_parser==0.1.47
 amazon_textract_response_parser==0.1.45
+boto3==1.26.142
 boto3==1.26.129
+Django==4.2
+djangorestframework==3.14.0
 ipython==8.13.2
 pandas==2.0.1
 pypdf==3.9.0
