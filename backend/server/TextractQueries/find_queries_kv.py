@@ -116,7 +116,8 @@ def outputQueries(s3BucketName, documentName, diligenceId, documentType, res):
             query_answers = d.get_query_answers(page=page)
             for x in query_answers:
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
-                    res.append(f"{x[1]}/{x[2]}")
+                    query_object = format_queries_as_dict(x[1], x[2])
+                    res.append(query_object)
         except:
             print("No queries found")
 
