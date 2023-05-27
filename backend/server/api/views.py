@@ -21,7 +21,6 @@ from django.http import FileResponse
 
 
 class LoginView(views.APIView):
-    # This view should be accessible also for unauthenticated users.
     
     permission_classes = (permissions.AllowAny,)
 
@@ -223,6 +222,8 @@ class DiligenceView(View):
             Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=user.id)
         datos={'message': 'Success', 'diligence': newDili}
         return JsonResponse(datos)
+    
+    
     
     def put(self, request):
         jd = json.loads(request.body)
