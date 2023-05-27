@@ -355,8 +355,10 @@ class DocumentView(views.APIView):
             path = post_serializer.data.get('document')
             doc_type = post_serializer.data.get('docType')
             diligence_id = post_serializer.data.get('diligence')
-            print(path, doc_type, diligence_id)
-            main(path, doc_type, diligence_id)
+            
+            res_ai = main(path, doc_type, diligence_id)
+            print(res_ai)
+            Answer.ai_response_parser(ai_res=res_ai, diligence_id=diligence_id)
             return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
         return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
     

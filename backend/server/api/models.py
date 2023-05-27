@@ -41,6 +41,13 @@ class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
     
+    def ai_response_parser(ai_res, diligence_id):
+        for key in ai_res:
+            print(key)
+            print(key['no_ici'])
+            answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
+            answer.update(ai_res=key['answer'], answer_type='AI')
+    
 class Mapping(models.Model):
     num_map = models.CharField(max_length=32, primary_key=True, unique=True)
     num_q = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -56,3 +63,4 @@ class Document(models.Model):
     docType = models.CharField(max_length=32, null=True)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)
+    

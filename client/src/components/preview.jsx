@@ -150,7 +150,7 @@ function Preview() {
                                             </div>
                                             : 
                                             <div>
-                                                <input type='text' name={key[2]} disabled={true} value={questions[key].getAnswer()? questions[key].getAnswer() : ''} />
+                                                <input type='text' name={key[2]} disabled={true} value={questions[key].getAiAnswer()? questions[key].getAiAnswer() : ''} />
                                                 <p>{questions[key].getAnswerType() === 'H' ? '100%' : ''}</p>
                                                 <button onClick={handleDisable}>Edit</button>
                                             </div>

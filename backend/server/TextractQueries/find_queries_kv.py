@@ -144,12 +144,12 @@ def format_queries_as_dict(question_number, answer):
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
-    print("client: ", client)
+    docName = documentName.split("/")[-1]
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
                 "Bucket": s3BucketName,
-                "Name": f'{diligenceId}/{documentType}/{documentName}',
+                "Name": f'{diligenceId}/{documentType}/{docName}',
             }
         },
         FeatureTypes=["QUERIES"],
@@ -175,16 +175,14 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def main(path, documentType, diligenceId):
-    print('main:', path, documentType, diligenceId)
     s3BucketName = "s3analysedoc"
     documentPath = os.path.realpath('.')+'{path}'.format(path=path)
     res = []
 
     uploadS3(s3BucketName, documentPath, diligenceId, documentType)
-    print("Uploaded to S3", "-"*20)
     outputQueries(s3BucketName, documentPath, diligenceId, documentType, res)
-    print(res)
     tempo2 = time.time()
     print(tempo2 - tempo)
+    return res
 
 
