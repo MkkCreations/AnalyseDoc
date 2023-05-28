@@ -103,7 +103,9 @@ def uploadS3(s3BucketName, documentName, diligenceId, documentType):
     s3.upload_file(
         Filename=documentName,
         Bucket=s3BucketName,
-        Key='{diligenceId}/{documentType}/{docName}'.format(diligenceId=diligenceId, documentType=documentType, docName=docName),
+        Key="{diligenceId}/{documentType}/{docName}".format(
+            diligenceId=diligenceId, documentType=documentType, docName=docName
+        ),
     )
 
 
@@ -115,12 +117,13 @@ def outputQueries(s3BucketName, documentName, diligenceId, documentType, res):
             print(f"--------- Page {i} ---------")
             page = d.pages[i]
             query_answers = d.get_query_answers(page=page)
+            print(query_answers)
             for x in query_answers:
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
                     query_object = format_queries_as_dict(x[1], x[2])
                     res.append(query_object)
         except:
-            print("No queries found")
+            continue
 
 
 def format_queries_as_dict(question_number, answer):
@@ -142,14 +145,16 @@ def format_queries_as_dict(question_number, answer):
         outputQueries(s3BucketName, f"{i}.pdf", diligenceId, documentType)
  """
 
+
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
+    print(docName)
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
                 "Bucket": s3BucketName,
-                "Name": f'{diligenceId}/{documentType}/{docName}',
+                "Name": f"{diligenceId}/{documentType}/{docName}",
             }
         },
         FeatureTypes=["QUERIES"],
@@ -175,8 +180,9 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def main(path, documentType, diligenceId):
-    s3BucketName = "s3analysedoc"
-    documentPath = os.path.realpath('.')+'{path}'.format(path=path)
+    s3BucketName = "inputanalyze"
+    documentPath = os.path.realpath(".") + "{path}".format(path=path)
+    print(documentPath)
     res = []
 
     uploadS3(s3BucketName, documentPath, diligenceId, documentType)
@@ -186,3 +192,9 @@ def main(path, documentType, diligenceId):
     return res
 
 
+if __name__ == "__main__":
+    main(
+        path="/documents/WolfsbergResized.pdf",
+        documentType="wolfsberg",
+        diligenceId="1",
+    )

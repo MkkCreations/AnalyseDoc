@@ -54,18 +54,6 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     return response
 
 
-def PrettyPrintTables(textract_json):
-    df = None
-    table_count = 0
-    tdoc = Document(textract_json)
-    for page in tdoc.pages:
-        for table in page.tables:
-            table_count += 1
-            df = pd.DataFrame(convert_table_to_list(trp_table=table))
-            print("Table id:", table.id, "Row count:", len(df.index))
-            display(df)
-
-
 def split_pdf_and_process_tables(file, s3BucketName, diligenceId, documentType):
     inputpdf = PdfReader(open(file, "rb"), strict=False)
     array_of_questions_answer = []
@@ -95,7 +83,7 @@ def format_wolfsberg_as_dict(wolfsberg_data):
             # regex to split on comma, but only comma not within double quotes
             values = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', item.strip())
             obj = {
-                "No": values[0].strip().lower().replace(" ", "."),
+                "No": values[0].strip().lower().replace(" ", ""),
                 "Question": values[1].strip(),
                 "Answer": values[2].strip() if len(values) > 2 else "",
             }
@@ -105,9 +93,6 @@ def format_wolfsberg_as_dict(wolfsberg_data):
         print(item)
 
     return objects
-
-
-# todo : make an array of wolfbserg questions that answer to a ici question
 
 
 def search_for_wolfsberg_answer(
@@ -122,7 +107,20 @@ def search_for_wolfsberg_answer(
     return None
 
 
-# def setup_formatted_data(wolfsberg_data, wolfsberg_to_ici_data)
+# todo : make an array of wolfbserg questions that answer to a ici question
+
+
+def format_table_object(array_of_questions_answers, wolfsberg_to_ici_data):
+    wolfsberg_data = format_wolfsberg_as_dict(array_of_questions_answers)
+    ici_data = []
+    for item in wolfsberg_to_ici_data:
+        object = search_for_wolfsberg_answer(
+            wolfsberg_data, item["wolfsberg"], item["ici"]
+        )
+        if object:
+            ici_data.append(object)
+    print(ici_data)
+    return ici_data
 
 
 def main():
@@ -130,7 +128,17 @@ def main():
     documentName = "./documents/BNP-WOLFSBERG-1-3.pdf"
     documentType = "WOLFSBERG"
     diligenceId = "1"
-    wolfsberg_to_ici_data = [{"wolfsberg": "1.1", "ici": "1.1.1"}]
+    wolfsberg_to_ici_data = [
+        {"wolfsberg": "19", "ici": "4.7"},
+        {"wolfsberg": "9i", "ici": "4.5"},
+        {"wolfsberg": "34b", "ici": "4.6"},
+        {"wolfsberg": "9n", "ici": "5.2"},
+        {"wolfsberg": "41", "ici": "5.3"},
+        {"wolfsberg": "18", "ici": "6.4"},
+        {"wolfsberg": "9n", "ici": "6.7"},
+        {"wolfsberg": "16i", "ici": "6.8"},
+        {"wolfsberg": "10", "ici": "6.11"},
+    ]
 
     uploadS3(s3BucketName, documentName, diligenceId, documentType)
     textract_json = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
@@ -140,7 +148,7 @@ def main():
         output_type=[Textract_Pretty_Print.TABLES],
     )
     array_of_questions_answer = csv_table_formatted.split("\r\n")
-    wolfsberg_data = format_wolfsberg_as_dict(array_of_questions_answer)
+    format_table_object(array_of_questions_answer, wolfsberg_to_ici_data)
 
 
 main()
