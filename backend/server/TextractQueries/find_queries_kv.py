@@ -149,7 +149,17 @@ def format_queries_as_dict(question_number, answer):
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
-    print(docName)
+    queryType = None
+    
+    if documentType == "Wolfsberg":
+        queryType = wolfsberg
+    elif documentType == "ESMA":
+        queryType = esma
+    elif documentType == "SIRENE":
+        queryType = sirene
+    elif documentType == "MIFID":
+        queryType = mifid2
+        
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
@@ -159,7 +169,7 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
         },
         FeatureTypes=["QUERIES"],
         QueriesConfig={
-            "Queries": wolfsberg,
+            "Queries": queryType,
         },
     )
 
