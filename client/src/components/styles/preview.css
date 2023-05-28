@@ -157,15 +157,15 @@
     background-color: var(--bgy);
 }
 
-.btnDwn button {
+.btnDwn a {
     border: none;
     background-color: var(--bgb);
-    color: var(--bgy);
+    color: var(--bgy) !important;
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
 }
 
-.btnDwn button:hover {
+.btnDwn a:hover {
     background-color: rgb(140, 140, 140);
 }

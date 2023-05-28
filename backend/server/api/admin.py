@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Document, User, Diligence, Answer, Mapping
+from .models import Question, Document, User, Diligence, Answer
 
 # Register your models here.
 
@@ -8,5 +8,5 @@ admin.site.register(Document)
 admin.site.register(User)
 admin.site.register(Diligence)
 admin.site.register(Answer)
-admin.site.register(Mapping)
+
 

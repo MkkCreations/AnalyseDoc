@@ -3,7 +3,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from .models import Question, Diligence, Answer, Mapping, Document
+from .models import Question, Diligence, Answer, Document
 from django.contrib.auth.models import User
 import json
 from datetime import datetime
@@ -16,6 +16,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 import os
 from TextractQueries.find_queries_kv import main
+from Mapping.pdfrwModul import mapping
 
 # Create your views here.
 
@@ -338,7 +339,7 @@ class DocumentView(views.APIView):
             if len(documents) > 0:
                 document = documents[0]
                 path = document['document']
-                with open('media/{path}'.format(path=path), 'rb') as pdf:
+                with open(f'{os.path.realpath(".")}/TextractQueries/media/{path}', 'rb') as pdf:
                     response = HttpResponse(pdf.read(), content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
                     return response
@@ -400,13 +401,17 @@ class MappingView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request):
-        jd = json.loads(request.body)
-        mappings = list(Mapping.objects.filter(num_map=jd['num_map'], num_q=Answer.objects.filter(diligence=jd['id_dili'])).values())
-        if len(mappings) > 0:
-            mapping = mappings[0]
-            datos={'message': 'Success', 'mapping': mapping}
-        else:
-            datos={'message': 'Not found...'}
-        return JsonResponse(datos)
+    def get(self, request, id_dili=0):
+        mappingData = Answer.get_mapping_num(diligence_id=id_dili)
+        path = mapping(mappingData=mappingData, diligence_id=id_dili)
+        dili = Diligence.objects.get(id=id_dili)
+        dili.ici = path
+        try:
+            print(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}')
+            with open(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}', 'rb') as pdf:
+                response = HttpResponse(pdf.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
+                return response
+        except:
+            return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
     

@@ -163,7 +163,7 @@ function Preview() {
                     </div>
                 </div>
                 <div className='btnDwn'>
-                    <button>Download I.C.I</button>
+                    <a href={`http://127.0.0.1:8000/api/mapping/${user.dili.id}/`}>Download I.C.I</a>
                 </div>
             </main>
         </div>
