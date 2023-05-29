@@ -75,6 +75,17 @@ def split_pdf_and_process_tables(file, s3BucketName, diligenceId, documentType):
     return array_of_questions_answer
 
 
+def get_confidence_of_table(table, number_of_confidence):
+    table_result = table["Blocks"]
+    confidence_list = []
+    while number_of_confidence > 0:
+        for item in table_result:
+            if item["BlockType"] == "CELL":
+                confidence_list.append(item["Confidence"])
+        number_of_confidence -= 1
+    return confidence_list
+
+
 def format_wolfsberg_as_dict(wolfsberg_data):
     raw_data = [item for item in wolfsberg_data if item]
     objects = []
@@ -96,13 +107,14 @@ def format_wolfsberg_as_dict(wolfsberg_data):
 
 
 def search_for_wolfsberg_answer(
-    wolfsberg_data, wolfsberg_question_number, ICI_question_number
+    wolfsberg_data, wolfsberg_question_number, ICI_question_number, confidence_score
 ):
     for item in wolfsberg_data:
         if item["No"] == wolfsberg_question_number:
             return {
                 "no_ici": ICI_question_number,
                 "answer": item["Answer"],
+                "confidence_score": confidence_score,
             }
     return None
 
@@ -110,12 +122,17 @@ def search_for_wolfsberg_answer(
 # todo : make an array of wolfbserg questions that answer to a ici question
 
 
-def format_table_object(array_of_questions_answers, wolfsberg_to_ici_data):
+def format_table_object(
+    array_of_questions_answers, wolfsberg_to_ici_data, confidence_list
+):
     wolfsberg_data = format_wolfsberg_as_dict(array_of_questions_answers)
     ici_data = []
-    for item in wolfsberg_to_ici_data:
+    for i, item in enumerate(wolfsberg_to_ici_data, start=0):
         object = search_for_wolfsberg_answer(
-            wolfsberg_data, item["wolfsberg"], item["ici"]
+            wolfsberg_data,
+            item["wolfsberg"],
+            item["ici"],
+            confidence_list[i],
         )
         if object:
             ici_data.append(object)
@@ -123,9 +140,9 @@ def format_table_object(array_of_questions_answers, wolfsberg_to_ici_data):
     return ici_data
 
 
-def main():
+def find_by_tables():
     s3BucketName = "inputanalyze"
-    documentName = "./documents/BNP-WOLFSBERG-1-3.pdf"
+    documentName = "./media/documents/1/BNP-WOLFSBERG-1-3.pdf"
     documentType = "WOLFSBERG"
     diligenceId = "1"
     wolfsberg_to_ici_data = [
@@ -142,13 +159,17 @@ def main():
 
     uploadS3(s3BucketName, documentName, diligenceId, documentType)
     textract_json = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
+    confidence_list = get_confidence_of_table(textract_json, len(wolfsberg_to_ici_data))
     csv_table_formatted = get_string(
         textract_json=textract_json,
         table_format=Pretty_Print_Table_Format.csv,
         output_type=[Textract_Pretty_Print.TABLES],
     )
     array_of_questions_answer = csv_table_formatted.split("\r\n")
-    format_table_object(array_of_questions_answer, wolfsberg_to_ici_data)
+    format_table_object(
+        array_of_questions_answer, wolfsberg_to_ici_data, confidence_list
+    )
 
 
-main()
+if __name__ == "__main__":
+    find_by_tables()

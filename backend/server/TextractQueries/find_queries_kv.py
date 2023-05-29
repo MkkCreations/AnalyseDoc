@@ -109,57 +109,60 @@ def uploadS3(s3BucketName, documentName, diligenceId, documentType):
     )
 
 
-def outputQueries(s3BucketName, documentName, diligenceId, documentType, res):
+def get_confidence_score(query_response):
+    confidence_list = []
+    query_result = query_response["Blocks"]
+    for block in query_result:
+        if block["BlockType"] == "QUERY_RESULT":
+            confidence_list.append(block["Confidence"])
+    return confidence_list
+
+
+def get_result_and_confidence(
+    s3BucketName, documentName, diligenceId, documentType, res
+):
     data = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
+    confidence_list = get_confidence_score(data)
     d = t2.TDocumentSchema().load(data)
+    # print("confidence", confidence)
     for i in range(len(d.pages)):
         try:
             print(f"--------- Page {i} ---------")
             page = d.pages[i]
             query_answers = d.get_query_answers(page=page)
-            print(query_answers)
             for x in query_answers:
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
-                    query_object = format_queries_as_dict(x[1], x[2])
+                    query_object = format_queries_as_dict(
+                        x[1], x[2], confidence_list[i]
+                    )
                     res.append(query_object)
         except:
             continue
 
 
-def format_queries_as_dict(question_number, answer):
+def format_queries_as_dict(question_number, answer, confidence_score):
     return {
         "no_ici": question_number,
         "answer": answer,
+        "confidence_score": confidence_score,
         "document_type": "wolfsberg",
     }
-
-
-""" def split_pdf(file, s3BucketName, documentType, diligenceId):
-    inputpdf = PdfReader(open(file, "rb"))
-    for i in range(len(inputpdf.pages)):
-        output = PdfWriter()
-        output.add_page(inputpdf.pages[i])
-        with open(f"{i}.pdf", "wb") as outputStream:
-            output.write(outputStream)
-        uploadS3(s3BucketName, f"{i}.pdf", diligenceId, documentType)
-        outputQueries(s3BucketName, f"{i}.pdf", diligenceId, documentType)
- """
 
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
     queryType = None
-    
-    if documentType == "Wolfsberg":
+
+    if documentType == "wolfsberg":
         queryType = wolfsberg
-    elif documentType == "ESMA":
+    elif documentType == "esma":
         queryType = esma
-    elif documentType == "SIRENE":
+    elif documentType == "sirene":
         queryType = sirene
-    elif documentType == "MIFID":
+    elif documentType == "mifid2":
         queryType = mifid2
-        
+
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
@@ -189,22 +192,24 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 # <<<<==================>>> Main <<<==================>>>>
 
 
-def main(path, documentType, diligenceId):
+def find_by_queries(path, documentType, diligenceId):
     s3BucketName = "inputanalyze"
     documentPath = os.path.realpath(".") + "{path}".format(path=path)
     print(documentPath)
     res = []
 
     uploadS3(s3BucketName, documentPath, diligenceId, documentType)
-    outputQueries(s3BucketName, documentPath, diligenceId, documentType, res)
+    get_result_and_confidence(
+        s3BucketName, documentPath, diligenceId, documentType, res
+    )
     tempo2 = time.time()
     print(tempo2 - tempo)
-    return res
+    print(res)
 
 
 if __name__ == "__main__":
-    main(
-        path="/documents/WolfsbergResized.pdf",
+    find_by_queries(
+        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
         documentType="wolfsberg",
         diligenceId="1",
     )
