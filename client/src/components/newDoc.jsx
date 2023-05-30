@@ -6,6 +6,7 @@ import { useAuth } from '../context/authContext';
 function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
     const {user, client} = useAuth();
     const [docsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "Other"]);
+    const [loading, setLoading] = useState(false);
     const [doc, setDoc] = useState({
         user: user.data.id,
         dili: user.dili.id,
@@ -67,10 +68,13 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
         }
         
         try {
+            setLoading(true);
+            setError("Loading...");
             if(edit) {
                 await client.put('documents/', {id: docData.id, name: data.name, docType: data.docType? data.docType: docData.docType, document: data.file? data.file: docData.document})
                     .then(res => {
                         console.log(res);
+                        setError("Document updated");
                     });
             } else {
                 await client.post('documents/', data, axiosConfig )
@@ -78,6 +82,8 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
                         console.log(res);
                     })
             }
+            setLoading(false);
+            setError("");
             setNewDoc(false);
         } catch (error) {
             console.log(error);

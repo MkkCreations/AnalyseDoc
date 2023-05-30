@@ -8,10 +8,11 @@ export class Question {
     parent;
     idAnswer;
     aiAnswer;
+    aiConfidence;
     answer;
     answerType;
 
-    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType) {
+    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType, aiConfidence) {
         this.id = id;
         this.numQ = numQ;
         this.question = question;
@@ -21,6 +22,7 @@ export class Question {
         this.aiAnswer = aiAnswer;
         this.answer = answer;
         this.answerType = answerType;
+        this.aiConfidence = aiConfidence;
     }
 
     getId() {
@@ -88,6 +90,14 @@ export class Question {
 
     setIdAnswer(idAnswer) {
         this.idAnswer = idAnswer;
+    }
+
+    getAiConfidence() {
+        return this.aiConfidence;
+    }
+
+    setAiConfidence(aiConfidence) {
+        this.aiConfidence = aiConfidence;
     }
 
 }

@@ -153,14 +153,15 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
     queryType = None
+    docType = documentType.lower()
 
-    if documentType == "wolfsberg":
+    if docType == "wolfsberg":
         queryType = wolfsberg
-    elif documentType == "esma":
+    elif docType == "esma":
         queryType = esma
-    elif documentType == "sirene":
+    elif docType == "sirene":
         queryType = sirene
-    elif documentType == "mifid2":
+    elif docType == "mifid2":
         queryType = mifid2
 
     response = client.start_document_analysis(
@@ -193,7 +194,7 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def find_by_queries(path, documentType, diligenceId):
-    s3BucketName = "inputanalyze"
+    s3BucketName = "s3analysedoc"
     documentPath = os.path.realpath(".") + "{path}".format(path=path)
     print(documentPath)
     res = []
@@ -205,11 +206,6 @@ def find_by_queries(path, documentType, diligenceId):
     tempo2 = time.time()
     print(tempo2 - tempo)
     print(res)
+    
+    return res
 
-
-if __name__ == "__main__":
-    find_by_queries(
-        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
-        documentType="wolfsberg",
-        diligenceId="1",
-    )

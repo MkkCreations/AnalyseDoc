@@ -35,12 +35,13 @@ class Diligence(models.Model):
             doc_type = Document.objects.get(id=doc_id).docType
             answers = Answer.objects.filter(diligence=dili, answer_type=doc_type)
         for answer in answers:
-            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type}]
+            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type}]
         return questions
 
 # ======================================== #
 class Answer(models.Model):
     ai_res = models.CharField(max_length=500, null=True)
+    ai_confidence = models.FloatField(null=True)
     answer = models.CharField(max_length=200, null=True)
     answer_type = models.CharField(max_length=32)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
@@ -49,8 +50,11 @@ class Answer(models.Model):
     
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:
-            answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
-            answer.update(ai_res=key['answer'], answer_type='AI')
+            try:
+                answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
+                answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'])
+            except:
+                pass
     
     # =================== Fonction pour automatiser le mapping ==================== #
     def get_mapping_num(diligence_id):

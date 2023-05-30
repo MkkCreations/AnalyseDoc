@@ -141,7 +141,7 @@ def format_table_object(
 
 
 def find_by_tables():
-    s3BucketName = "inputanalyze"
+    s3BucketName = "s3analysedoc"
     documentName = "./media/documents/1/BNP-WOLFSBERG-1-3.pdf"
     documentType = "WOLFSBERG"
     diligenceId = "1"

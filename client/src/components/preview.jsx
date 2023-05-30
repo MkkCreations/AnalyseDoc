@@ -15,7 +15,7 @@ function Preview() {
             await client.get(`answers/${user.dili.id}/0`)
                 .then(res => {
                     for (const key in res.data.data) {
-                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type);
+                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
@@ -141,17 +141,16 @@ function Preview() {
                                     <form onChange={(e)=>handleChange(key,e)}>
                                         {questions[key].getType() === 'R' ?
                                             <div> 
-                                                <div>{questions[key].getAiAnswer()}</div>
                                                 <label>Yes</label>
-                                                <input type='radio' name={key} value={'yes'} defaultChecked={questions[key].getAnswer() === 'True'?true:false} />
+                                                <input type='radio' name={key} value={'Yes'} defaultChecked={questions[key].getAiAnswer()? questions[key].getAiAnswer(): questions[key].getAnswer() === 'Yes'?true:false} />
                                                 <label>No</label>
-                                                <input type='radio' name={key} value={'no'} defaultChecked={questions[key].getAnswer() === 'False'?true:false} />
-                                                <p>{questions[key].getAnswerType() === 'H' ? '100%' : ''}</p>
+                                                <input type='radio' name={key} value={'No'} defaultChecked={questions[key].getAiAnswer()? questions[key].getAiAnswer(): questions[key].getAnswer() === 'No'?true:false} />
+                                                <p>{questions[key].getAiConfidence()? questions[key].getAiConfidence()+'%' : 0+'%'}</p>
                                             </div>
                                             : 
                                             <div>
                                                 <input type='text' name={key[2]} disabled={true} value={questions[key].getAiAnswer()? questions[key].getAiAnswer() : ''} />
-                                                <p>{questions[key].getAnswerType() === 'H' ? '100%' : ''}</p>
+                                                <p>{questions[key].getAiConfidence()? questions[key].getAiConfidence()+'%' : 0+'%'}</p>
                                                 <button onClick={handleDisable}>Edit</button>
                                             </div>
                                         }
