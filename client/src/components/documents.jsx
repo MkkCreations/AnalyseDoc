@@ -6,12 +6,14 @@ import { Link } from 'react-router-dom';
 import Header from "./header";
 import { useEffect, useState } from 'react';
 import NewDoc from './newDoc';
+import PopUpInfo from './popUpInfo';
 
 function Documents() {
     const {user, client} = useAuth();
     const [docs, setDocs] = useState([{}]);
     const [newDoc, setNewDoc] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState();
+    const [loading, setLoading] = useState(false);
 
     const getDocs = async () => {
         try {
@@ -25,23 +27,19 @@ function Documents() {
     }
 
     const handleShowDoc = (doc) => {
-        try {
-            client.get(`documents/${user.dili.id}/${doc.id}/`, {responseType: 'blob'})
-        } catch (error) {
-            console.log(error);
-        }
+        setSelectedDoc(doc);
     }
 
     useEffect(() => {
         getDocs();
-    }, [newDoc, setNewDoc])
+    }, [newDoc, setNewDoc, loading])
 
     return (
         <div className="documents">
             <Header />
             {
                 !newDoc? '':
-                <NewDoc setNewDoc={setNewDoc} docs={docs} edit={false} docData={[]} />
+                <NewDoc setNewDoc={setNewDoc} docs={docs} edit={false} docData={[]} setLoading={setLoading} />
             }
             <main>
                 <h2><Link to={'/projects'}>Projects</Link> - Documents({user.dili.dili_name})</h2>
@@ -57,7 +55,7 @@ function Documents() {
                         <div>
                             { docs[0] === undefined? <center><p>No documents</p></center>:
                                 docs.map(doc => {
-                                    return <section className='docLink' /* onClick={() => {handleShowDoc(doc)}} */ ><DocField doc={doc} key={doc.id} getDocs={getDocs} setSelectedDoc={setSelectedDoc} docs={docs}/></section>
+                                    return <section className='docLink' onClick={() => {handleShowDoc(doc)}} ><DocField doc={doc} key={doc.id} getDocs={getDocs} setSelectedDoc={setSelectedDoc} docs={docs} setLoading={setLoading}/></section>
                                 })
                             }
                         </div>
@@ -70,19 +68,24 @@ function Documents() {
                     </span>
                 </section>
             </main>
+            {
+                !loading? '':
+                <PopUpInfo loading={loading} />
+            }
         </div>
     )
 }
 
-function DocField({doc, getDocs, setSelectedDoc, docs}) {
+function DocField({doc, getDocs, setSelectedDoc, docs, setLoading}) {
     const {user, client} = useAuth();
     const [settings, setSettings] = useState(false);
     const [editDoc, setEditDoc] = useState(false);
 
+
     const handleEdit = (document) => {
         setEditDoc(true);
         return (
-            <NewDoc setNewDoc={setEditDoc} edit={true} docData={document} docs={docs} />
+            <NewDoc setNewDoc={setEditDoc} edit={true} docData={document} docs={docs} setLoading={setLoading}/>
         )
     }
 
@@ -104,7 +107,7 @@ function DocField({doc, getDocs, setSelectedDoc, docs}) {
     return (
         <article key={doc.id}>
             <div onClick={() => {setSelectedDoc(doc)}}>
-                <span style={{display: !editDoc?'none': 'unset'}}><NewDoc setNewDoc={setEditDoc} edit={true} docData={doc} /></span>
+                <span style={{display: !editDoc?'none': 'unset'}}><NewDoc setNewDoc={setEditDoc} edit={true} docData={doc} setLoading={setLoading}/></span>
                 <h5>{doc.docType}</h5>
                 <p>{doc.name}</p>
                 <p>{new Date(doc.date).toLocaleString()}</p>

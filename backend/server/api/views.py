@@ -386,8 +386,10 @@ class DocumentView(views.APIView):
     def delete(self, request, id_dili, id_doc):
         documents = list(Document.objects.filter(id=id_doc).values())
         if len(documents) > 0:
+            doc_type = Document.objects.filter(id=id_doc).values()[0]['docType']
             Document.objects.filter(id=id_doc).delete()
             os.remove('TextractQueries/media/{path}'.format(path=documents[0]['document']))
+            Answer.clear_ai_answers(diligence_id=id_dili, doc_name=doc_type)
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}

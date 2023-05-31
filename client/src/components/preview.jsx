@@ -43,17 +43,19 @@ function Preview() {
     const handleFilter = (e) => {
         if (e.target.value === 'nonAnswered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer !== null) {
+                if (questions[key].Answer !== null || questions[key].AiAnswer !== null) {
                     delete questions[key];
                 }
+                return '';
             }
             )
             setQuestions({...questions});
         } else if (e.target.value === 'answered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer === null) {
+                if (questions[key].Answer === null || questions[key].AiAnswer === null) {
                     delete questions[key];
                 }
+                return '';
             }
             )
             setQuestions({...questions});
@@ -150,7 +152,8 @@ function Preview() {
                                             : 
                                             <div>
                                                 <input type='text' name={key[2]} disabled={true} value={questions[key].AiAnswer? questions[key].AiAnswer : ''} />
-                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}{questions[key].documentName}</p>
+                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
+                                                <p>{questions[key].documentName}</p>
                                                 <button onClick={handleDisable}>Edit</button>
                                             </div>
                                         }

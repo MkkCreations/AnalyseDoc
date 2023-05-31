@@ -43,7 +43,7 @@ class Answer(models.Model):
     ai_res = models.CharField(max_length=500, null=True)
     ai_confidence = models.FloatField(null=True)
     answer = models.CharField(max_length=200, null=True)
-    answer_type = models.CharField(max_length=32)
+    answer_type = models.CharField(max_length=32, null=True)
     document_name = models.CharField(max_length=64, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -53,10 +53,14 @@ class Answer(models.Model):
         for key in ai_res:
             try:
                 answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
-                answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'])
+                answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'], document_name=key['document_type'])
             except:
                 pass
     
+    def clear_ai_answers(diligence_id, doc_name):
+        answers = Answer.objects.filter(diligence=diligence_id, answer_type='AI', document_name=doc_name)
+        answers.update(ai_res=None, ai_confidence=None, answer_type=None, document_name=None)
+
     # =================== Fonction pour automatiser le mapping ==================== #
     def get_mapping_num(diligence_id):
         resultats = []
@@ -108,7 +112,7 @@ def upload_to(instance, filename):
     return 'documents/{diligence}/{filename}'.format(filename=filename, diligence=instance.diligence.id)
     
 class Document(models.Model):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=32)
     document = models.FileField(upload_to=upload_to)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     docType = models.CharField(max_length=32, null=True)
