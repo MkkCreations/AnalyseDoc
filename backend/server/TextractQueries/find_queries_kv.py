@@ -45,16 +45,16 @@ wolfsberg = [
 ]
 
 esma = [
-    {"Text": "Is the entity regulated ?", "Alias": "REGULATED_ENTITY", "Pages": ["1"]},
+    {"Text": "Is the entity regulated ?", "Alias": "1.4", "Pages": ["1"]},
     {
         "Text": "What are the services name of the current activities ?",
-        "Alias": "SERVICES_NAME",
+        "Alias": "2.4",
         "Pages": ["1"],
     },
 ]
 
 sirene = [
-    {"Text": "What is the main exerced activity ?", "Alias": "TYPE_OF_BUSINESS"},
+    {"Text": "What is the main exerced activity ?", "Alias": "2.3"},
 ]
 
 mifid2 = [
@@ -87,13 +87,13 @@ mifid2 = [
 corporation = [
     {
         "Text": "What is the name of the director and chief exectuive officer ?",
-        "Alias": "DIRECTOR_NAME",
+        "Alias": "1.8",
         "Pages": ["1"],
     },
 ]
 
 chiffre_cles = [
-    {"Text": "Produit net bancaire ? ", "Alias": "LEVEL_ASSETS", "Pages": ["1"]},
+    {"Text": "Produit net bancaire ? ", "Alias": "2.1", "Pages": ["1"]},
 ]
 
 
