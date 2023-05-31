@@ -45,16 +45,16 @@ wolfsberg = [
 ]
 
 esma = [
-    {"Text": "Is the entity regulated ?", "Alias": "REGULATED_ENTITY", "Pages": ["1"]},
+    {"Text": "Is the entity regulated ?", "Alias": "1.4", "Pages": ["1"]},
     {
         "Text": "What are the services name of the current activities ?",
-        "Alias": "SERVICES_NAME",
+        "Alias": "2.4",
         "Pages": ["1"],
     },
 ]
 
 sirene = [
-    {"Text": "What is the main exerced activity ?", "Alias": "TYPE_OF_BUSINESS"},
+    {"Text": "What is the main exerced activity ?", "Alias": "2.3"},
 ]
 
 mifid2 = [
@@ -87,13 +87,13 @@ mifid2 = [
 corporation = [
     {
         "Text": "What is the name of the director and chief exectuive officer ?",
-        "Alias": "DIRECTOR_NAME",
+        "Alias": "1.8",
         "Pages": ["1"],
     },
 ]
 
 chiffre_cles = [
-    {"Text": "Produit net bancaire ? ", "Alias": "LEVEL_ASSETS", "Pages": ["1"]},
+    {"Text": "Produit net bancaire ? ", "Alias": "2.1", "Pages": ["1"]},
 ]
 
 
@@ -153,14 +153,15 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
     queryType = None
+    docType = documentType.lower()
 
-    if documentType == "wolfsberg":
+    if docType == "wolfsberg":
         queryType = wolfsberg
-    elif documentType == "esma":
+    elif docType == "esma":
         queryType = esma
-    elif documentType == "sirene":
+    elif docType == "sirene":
         queryType = sirene
-    elif documentType == "mifid2":
+    elif docType == "mifid2":
         queryType = mifid2
 
     response = client.start_document_analysis(
@@ -204,6 +205,8 @@ def find_by_queries(path, document_type, dilligence_id):
     tempo2 = time.time()
     print(tempo2 - tempo)
     print(res)
+    
+    return res
 
 
 if __name__ == "__main__":

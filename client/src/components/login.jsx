@@ -58,7 +58,7 @@ function Login() {
                     </figure>
                     <input type="password" name="pwd" placeholder="Password" onChange={handleChange}/>
                 </span>
-                <a className='forgot' href="/">Forgot Password?</a>
+                <a className='forgot' href="/">Forgot password?</a>
                 <br/>
                 <button>Login</button>
                 <Link className='signup' to={'/signup'}>Sign up</Link>

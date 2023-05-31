@@ -69,7 +69,7 @@ function Account() {
             <main>
                 <h2>Account</h2>
                 <form onSubmit={handleSubmit}>
-                    <h2>User Data</h2>
+                    <h2>User data</h2>
                     <span>
                         <label htmlFor="first_name">First name</label>
                         <input type="text" name="first_name" id="first_name" placeholder="First name" defaultValue={user.data.first_name} onChange={handleChange} />

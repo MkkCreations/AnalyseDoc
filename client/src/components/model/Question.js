@@ -1,93 +1,113 @@
 
 
 export class Question {
-    id;
-    numQ;
-    question;
-    type;
-    parent;
-    idAnswer;
-    aiAnswer;
-    answer;
-    answerType;
+    _id;
+    _numQ;
+    _question;
+    _type;
+    _parent;
+    _idAnswer;
+    _aiAnswer;
+    _aiConfidence;
+    _answer;
+    _answerType;
+    _documentName;
 
-    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType) {
-        this.id = id;
-        this.numQ = numQ;
-        this.question = question;
-        this.type = type;
-        this.parent = parent;
-        this.idAnswer = idAnswer;
-        this.aiAnswer = aiAnswer;
-        this.answer = answer;
-        this.answerType = answerType;
+    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType, aiConfidence, documentName) {
+        this._id = id;
+        this._numQ = numQ;
+        this._question = question;
+        this._type = type;
+        this._parent = parent;
+        this._idAnswer = idAnswer;
+        this._aiAnswer = aiAnswer;
+        this._answer = answer;
+        this._answerType = answerType;
+        this._aiConfidence = aiConfidence;
+        this.documentName = documentName;
     }
 
-    getId() {
-        return this.id;
+    get Id() {
+        return this._id;
     }
 
-    getNumQ() {
-        return this.numQ;
+    get NumQ() {
+        return this._numQ;
     }
-    getQuestion() {
-        return this.question;
-    }
-
-    getType() {
-        return this.type;
+    get Question() {
+        return this._question;
     }
 
-    getParent() {
-        return this.parent;
+    get Type() {
+        return this._type;
     }
 
-    getAnswer() {
-        return this.answer;
+    get Parent() {
+        return this._parent;
     }
 
-    getAnswerType() {
-        return this.answerType;
+    get Answer() {
+        return this._answer;
     }
 
-    setId(id) {
-        this.id = id;
+    get AnswerType() {
+        return this._answerType;
     }
 
-    setQuestion(question) {
-        this.question = question;
+    set Id(id) {
+        this._id = id;
     }
 
-    setType(type) {
-        this.type = type;
+    set Question(question) {
+        this._question = question;
     }
 
-    setParent(parent) {
-        this.parent = parent;
+    set Type(type) {
+        this._type = type;
     }
 
-    setAnswer(answer) {
-        this.answer = answer;
+    set Parent(parent) {
+        this._parent = parent;
     }
 
-    setAnswerType(answerType) {
-        this.answerType = answerType;
+    set Answer(answer) {
+        this._answer = answer;
     }
 
-    getAiAnswer() {
-        return this.aiAnswer;
+    set AnswerType(answerType) {
+        this._answerType = answerType;
     }
 
-    setAiAnswer(aiAnswer) {
-        this.aiAnswer = aiAnswer;
+    get AiAnswer() {
+        return this._aiAnswer;
     }
 
-    getIdAnswer() {
-        return this.idAnswer;
+    set AiAnswer(aiAnswer) {
+        this._aiAnswer = aiAnswer;
     }
 
-    setIdAnswer(idAnswer) {
-        this.idAnswer = idAnswer;
+    get IdAnswer() {
+        return this._idAnswer;
+    }
+
+    set IdAnswer(idAnswer) {
+        this._idAnswer = idAnswer;
+    }
+
+    get AiConfidence() {
+        return this._aiConfidence;
+    }
+
+    set AiConfidence(aiConfidence) {
+        this._aiConfidence = aiConfidence;
+    }
+
+    get documentName() {
+        return this._documentName;
+    }
+
+    set documentName(value) {
+        this._documentName = value;
     }
 
 }

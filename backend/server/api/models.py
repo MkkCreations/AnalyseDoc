@@ -35,23 +35,32 @@ class Diligence(models.Model):
             doc_type = Document.objects.get(id=doc_id).docType
             answers = Answer.objects.filter(diligence=dili, answer_type=doc_type)
         for answer in answers:
-            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type}]
+            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type, 'document_name': answer.document_name}]
         return questions
 
 # ======================================== #
 class Answer(models.Model):
     ai_res = models.CharField(max_length=500, null=True)
+    ai_confidence = models.FloatField(null=True)
     answer = models.CharField(max_length=200, null=True)
-    answer_type = models.CharField(max_length=32)
+    answer_type = models.CharField(max_length=32, null=True)
+    document_name = models.CharField(max_length=64, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
     
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:
-            answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
-            answer.update(ai_res=key['answer'], answer_type='AI')
+            try:
+                answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
+                answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'], document_name=key['document_type'])
+            except:
+                pass
     
+    def clear_ai_answers(diligence_id, doc_name):
+        answers = Answer.objects.filter(diligence=diligence_id, answer_type='AI', document_name=doc_name)
+        answers.update(ai_res=None, ai_confidence=None, answer_type=None, document_name=None)
+
     # =================== Fonction pour automatiser le mapping ==================== #
     def get_mapping_num(diligence_id):
         resultats = []
@@ -82,7 +91,7 @@ class Answer(models.Model):
 # ======================================== #
 class Mapping_text(models.Model):
     num_map = models.CharField(max_length=32, primary_key=True, unique=True)
-    num_q = models.CharField(max_length=16, unique=True)
+    num_q = models.CharField(max_length=16)
     
 class Mapping_radio(models.Model):
     num_q = models.CharField(max_length=16, primary_key=True, unique=True)
@@ -103,7 +112,7 @@ def upload_to(instance, filename):
     return 'documents/{diligence}/{filename}'.format(filename=filename, diligence=instance.diligence.id)
     
 class Document(models.Model):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=32)
     document = models.FileField(upload_to=upload_to)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     docType = models.CharField(max_length=32, null=True)

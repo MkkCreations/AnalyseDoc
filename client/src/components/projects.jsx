@@ -53,7 +53,7 @@ function Projects() {
             <main>
                 <h2>Project</h2>
                 <span className='searchBar'>
-                    <Link onClick={() => {setNewDili(true)}}>New Project</Link>
+                    <Link onClick={() => {setNewDili(true)}}>New project</Link>
                     <div>
                         <input type="text" placeholder='Search' onChange={handleSearch}/>
                     </div>

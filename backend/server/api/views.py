@@ -15,7 +15,7 @@ from . import serializers
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 import os
-from TextractQueries.find_queries_kv import main
+from TextractQueries.find_queries_kv import find_by_queries
 from Mapping.pdfrwModul import mapping
 
 # Create your views here.
@@ -357,7 +357,7 @@ class DocumentView(views.APIView):
             doc_type = post_serializer.data.get('docType')
             diligence_id = post_serializer.data.get('diligence')
             
-            res_ai = main(path, doc_type, diligence_id)
+            res_ai = find_by_queries(path, doc_type, diligence_id)
             print(res_ai)
             Answer.ai_response_parser(ai_res=res_ai, diligence_id=diligence_id)
             return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
@@ -386,8 +386,10 @@ class DocumentView(views.APIView):
     def delete(self, request, id_dili, id_doc):
         documents = list(Document.objects.filter(id=id_doc).values())
         if len(documents) > 0:
+            doc_type = Document.objects.filter(id=id_doc).values()[0]['docType']
             Document.objects.filter(id=id_doc).delete()
             os.remove('TextractQueries/media/{path}'.format(path=documents[0]['document']))
+            Answer.clear_ai_answers(diligence_id=id_dili, doc_name=doc_type)
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}
@@ -413,5 +415,5 @@ class MappingView(View):
                 response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
                 return response
         except:
-            return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
+            return JsonResponse({'message':'Failed'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
     

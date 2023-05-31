@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/authContext';
 
 
-function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
+function NewDoc({setNewDoc, edit=false, docs, docData=[], setLoading}) {
     const {user, client} = useAuth();
     const [docsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "Other"]);
     const [doc, setDoc] = useState({
@@ -67,6 +67,8 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
         }
         
         try {
+            setLoading(true);
+            setNewDoc(false);
             if(edit) {
                 await client.put('documents/', {id: docData.id, name: data.name, docType: data.docType? data.docType: docData.docType, document: data.file? data.file: docData.document})
                     .then(res => {
@@ -78,7 +80,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
                         console.log(res);
                     })
             }
-            setNewDoc(false);
+            setLoading(false);
         } catch (error) {
             console.log(error);
             setError(error.message);
@@ -89,7 +91,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
         <div className="newDocApp">
             <div className='bg'></div>
             <div className='newDoc'>
-                {edit? <h2>Edit document</h2> : <h2>New docuemnt</h2>}
+                {edit? <h2>Edit document</h2> : <h2>New document</h2>}
                 <form onSubmit={handleSubmit}>
                     {error?<p style={{color: 'red !important'}}>{error}</p> : ''}
                     {edit? <h5>Actuale: <b>{docData.name}</b></h5>:''}
@@ -118,8 +120,8 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
                         !edit? <input type="file" name="file" id="inpFile" onChange={handleFile} required/>: <input type="file" name="file" id="inpFile" onChange={handleFile} />
                     }
                     <span>
-                        <p onClick={() => {setNewDoc(false)}}>Annuler</p>
-                        <button>Valider</button>
+                        <p onClick={() => {setNewDoc(false)}}>Cancel</p>
+                        <button>Confirm</button>
                     </span>
                 </form>
             </div>

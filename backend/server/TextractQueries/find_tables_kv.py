@@ -160,6 +160,7 @@ def find_by_tables(path, document_type, diligence_id):
     # documentName = "./media/documents/1/wolfsbergBNP-Paribas-France.pdf"
     # documentType = "WOLFSBERG"
     # diligenceId = "1"
+    
     wolfsberg_to_ici_data = [
         {"wolfsberg": "19", "ici": "4.7"},
         {"wolfsberg": "9i", "ici": "4.5"},
