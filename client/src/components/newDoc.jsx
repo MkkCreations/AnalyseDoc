@@ -95,7 +95,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
         <div className="newDocApp">
             <div className='bg'></div>
             <div className='newDoc'>
-                {edit? <h2>Edit document</h2> : <h2>New docuemnt</h2>}
+                {edit? <h2>Edit document</h2> : <h2>New document</h2>}
                 <form onSubmit={handleSubmit}>
                     {error?<p style={{color: 'red !important'}}>{error}</p> : ''}
                     {edit? <h5>Actuale: <b>{docData.name}</b></h5>:''}
@@ -124,8 +124,8 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[]}) {
                         !edit? <input type="file" name="file" id="inpFile" onChange={handleFile} required/>: <input type="file" name="file" id="inpFile" onChange={handleFile} />
                     }
                     <span>
-                        <p onClick={() => {setNewDoc(false)}}>Annuler</p>
-                        <button>Valider</button>
+                        <p onClick={() => {setNewDoc(false)}}>Cancel</p>
+                        <button>Confirm</button>
                     </span>
                 </form>
             </div>

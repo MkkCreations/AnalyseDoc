@@ -48,14 +48,14 @@ function New({setNewDili, edit=false, dili={}}) {
         <div className="newApp">
             <div className='bg'></div>
             <div className='new'>
-                {edit? <h2>Edit Project</h2> : <h2>New Project</h2>}
+                {edit? <h2>Edit project</h2> : <h2>New project</h2>}
                 <form onSubmit={handleSubmit}>
                     {message?<p style={{color: 'red'}}>{message}</p> : ''}
-                    {edit? <h5>Actuale: <b>{dili[1]}</b></h5>:''}
+                    {edit? <h5>Actual: <b>{dili[1]}</b></h5>:''}
                     <input type="text" placeholder="Nom de l'entreprise" onChange={handleChange} required/>
                     <span>
-                        <p onClick={() => {setNewDili(false)}}>Annuler</p>
-                        <button>Valider</button>
+                        <p onClick={() => {setNewDili(false)}}>Cancel</p>
+                        <button>Confirm</button>
                     </span>
                 </form>
             </div>

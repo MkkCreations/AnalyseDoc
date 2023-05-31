@@ -49,7 +49,7 @@ function Documents() {
                 <section>
                     <span className='docs'>
                         <div>
-                            <h4 onClick={() => {setNewDoc(!newDoc)}}>New Document</h4>
+                            <h4 onClick={() => {setNewDoc(!newDoc)}}>New document</h4>
                             <div>
                                 <p>{docs? (docs.length/4)*100+'%':'---'}</p>
                             </div>

@@ -119,7 +119,7 @@ function Preview() {
                             <select name="orderby" id="orderby" onChange={handleFilter}>
                                 <option value="default"></option>
                                 <option value="answered">Answered</option>
-                                <option value="nonAnswered">No answered</option>
+                                <option value="nonAnswered">Not answered</option>
                             </select>
                         </div>
                     </div>
