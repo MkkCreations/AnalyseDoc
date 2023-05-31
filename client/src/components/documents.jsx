@@ -134,7 +134,7 @@ function Questions(doc) {
             await client.get(`answers/${user.dili.id}/${doc.doc.id}`)
                 .then(res => {
                     for (const key in res.data.data) {
-                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type);
+                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence, res.data.data[key][1].document_name);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
@@ -149,7 +149,7 @@ function Questions(doc) {
         console.log(e.target.value);
         console.log(key);
         console.log(questions[key]);
-        questions[key].setAnswer(e.target.value);
+        questions[key].Answer = e.target.value;
         console.log(questions[key]);
     }
 
@@ -171,23 +171,23 @@ function Questions(doc) {
             <center><h2>{doc.doc.docType}</h2></center>
             {Object.keys(questions).map(key => {
                 return <div className='question' key={key}>
-                    <h4>{questions[key].getNumQ()}  {questions[key].getQuestion()}</h4>
+                    <h4>{questions[key].NumQ}  {questions[key].Question}</h4>
                     <hr />
                     <div>
                         <form onChange={(e)=>handleChange(key,e)}>
-                            {questions[key].getType() === 'R' ?
+                            {questions[key].Type === 'R' ?
                                 <div> 
-                                    <div>{questions[key].getAiAnswer()}</div>
+                                    <div>{questions[key].AiAnswer}</div>
                                     <label>Yes</label>
-                                    <input type='radio' name={key} value={'yes'} defaultChecked={questions[key].getAnswer() === 'True'?true:false} />
+                                    <input type='radio' name={key} value={'yes'} defaultChecked={questions[key].Answer === 'True'?true:false} />
                                     <label>No</label>
-                                    <input type='radio' name={key} value={'no'} defaultChecked={questions[key].getAnswer() === 'False'?true:false} />
-                                    <p>{questions[key].getAnswerType() === 'H' ? '100%' : ''}</p>
+                                    <input type='radio' name={key} value={'no'} defaultChecked={questions[key].Answer === 'False'?true:false} />
+                                    <p>{questions[key].AnswerType === 'H' ? '100%' : ''}</p>
                                 </div>
                                 : 
                                 <div>
-                                    <input type='text' name={key[2]} disabled={true} value={questions[key].getAnswer()? questions[key].getAnswer() : ''} />
-                                    <p>{questions[key].getAnswerType() === 'H' ? '100%' : ''}</p>
+                                    <input type='text' name={key[2]} disabled={true} value={questions[key].Answer? questions[key].Answer : ''} />
+                                    <p>{questions[key].AnswerType === 'H' ? '100%' : ''}</p>
                                     <button onClick={handleDisable}>Edit</button>
                                 </div>
                             }

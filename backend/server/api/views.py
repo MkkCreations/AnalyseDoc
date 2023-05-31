@@ -413,5 +413,5 @@ class MappingView(View):
                 response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
                 return response
         except:
-            return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
+            return JsonResponse({'message':'Failed'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
     

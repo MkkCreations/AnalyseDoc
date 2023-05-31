@@ -15,7 +15,7 @@ function Preview() {
             await client.get(`answers/${user.dili.id}/0`)
                 .then(res => {
                     for (const key in res.data.data) {
-                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence);
+                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence, res.data.data[key][1].document_name);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
@@ -30,7 +30,7 @@ function Preview() {
             fetchQuestions();
         } else {
             Object.keys(questions).map(key => {
-                if (!questions[key].getNumQ().toLowerCase().includes(e.target.value.toLowerCase()) && !questions[key].getQuestion().toLowerCase().includes(e.target.value.toLowerCase())) {
+                if (!questions[key].NumQ.toLowerCase().includes(e.target.value.toLowerCase()) && !questions[key].Question.toLowerCase().includes(e.target.value.toLowerCase())) {
                     delete questions[key];
                 }
                 return null;
@@ -43,7 +43,7 @@ function Preview() {
     const handleFilter = (e) => {
         if (e.target.value === 'nonAnswered') {
             Object.keys(questions).map(key => {
-                if (questions[key].getAnswer() !== null) {
+                if (questions[key].Answer !== null) {
                     delete questions[key];
                 }
             }
@@ -51,7 +51,7 @@ function Preview() {
             setQuestions({...questions});
         } else if (e.target.value === 'answered') {
             Object.keys(questions).map(key => {
-                if (questions[key].getAnswer() === null) {
+                if (questions[key].Answer === null) {
                     delete questions[key];
                 }
             }
@@ -63,24 +63,24 @@ function Preview() {
     }
 
     const handleChange = (key, e) => {
-        if (questions[key].getType() === 'R') {
+        if (questions[key].Type() === 'R') {
             if (e.target.value === 'yes') {
-                questions[key].setAnswer(true);
-                questions[key].setAnswerType('H');
+                questions[key].Answer = true;
+                questions[key].AnswerType = 'H';
             } else {
-                questions[key].setAnswer(false);
-                questions[key].setAnswerType('H');
+                questions[key].Answer = false;
+                questions[key].AnswerType = 'H';
             }
         } else {
-            questions[key].setAnswer(e.target.value);
-            questions[key].setAnswerType('H');
+            questions[key].Answer = e.target.value;
+            questions[key].AnswerType = 'H';
 
         }
         const answer = {
-            id: questions[key].getIdAnswer(),
-            answer: questions[key].getAnswer(),
-            answer_type: questions[key].getAnswerType(),
-            id_q: questions[key].getId(),
+            id: questions[key].IdAnswer,
+            answer: questions[key].Answer,
+            answer_type: questions[key].AnswerTyp,
+            id_q: questions[key].Id,
             id_dili: user.dili.id
         }
         putAnswer(answer);
@@ -135,22 +135,22 @@ function Preview() {
                     <div>
                        {Object.keys(questions).map(key => {
                             return <div className='question' key={key}>
-                                <h4>{questions[key].getNumQ()}  {questions[key].getQuestion()}</h4>
+                                <h4>{questions[key].NumQ}  {questions[key].Question}</h4>
                                 <hr />
                                 <div>
                                     <form onChange={(e)=>handleChange(key,e)}>
-                                        {questions[key].getType() === 'R' ?
+                                        {questions[key].Type === 'R' ?
                                             <div> 
                                                 <label>Yes</label>
-                                                <input type='radio' name={key} value={'Yes'} defaultChecked={questions[key].getAiAnswer()? questions[key].getAiAnswer(): questions[key].getAnswer() === 'Yes'?true:false} />
+                                                <input type='radio' name={key} value={'Yes'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'Yes'?true:false} />
                                                 <label>No</label>
-                                                <input type='radio' name={key} value={'No'} defaultChecked={questions[key].getAiAnswer()? questions[key].getAiAnswer(): questions[key].getAnswer() === 'No'?true:false} />
-                                                <p>{questions[key].getAiConfidence()? questions[key].getAiConfidence()+'%' : 0+'%'}</p>
+                                                <input type='radio' name={key} value={'No'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'No'?true:false} />
+                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                             </div>
                                             : 
                                             <div>
-                                                <input type='text' name={key[2]} disabled={true} value={questions[key].getAiAnswer()? questions[key].getAiAnswer() : ''} />
-                                                <p>{questions[key].getAiConfidence()? questions[key].getAiConfidence()+'%' : 0+'%'}</p>
+                                                <input type='text' name={key[2]} disabled={true} value={questions[key].AiAnswer? questions[key].AiAnswer : ''} />
+                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}{questions[key].documentName}</p>
                                                 <button onClick={handleDisable}>Edit</button>
                                             </div>
                                         }

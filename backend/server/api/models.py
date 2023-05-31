@@ -35,7 +35,7 @@ class Diligence(models.Model):
             doc_type = Document.objects.get(id=doc_id).docType
             answers = Answer.objects.filter(diligence=dili, answer_type=doc_type)
         for answer in answers:
-            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type}]
+            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type, 'document_name': answer.document_name}]
         return questions
 
 # ======================================== #
@@ -44,6 +44,7 @@ class Answer(models.Model):
     ai_confidence = models.FloatField(null=True)
     answer = models.CharField(max_length=200, null=True)
     answer_type = models.CharField(max_length=32)
+    document_name = models.CharField(max_length=64, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
@@ -86,7 +87,7 @@ class Answer(models.Model):
 # ======================================== #
 class Mapping_text(models.Model):
     num_map = models.CharField(max_length=32, primary_key=True, unique=True)
-    num_q = models.CharField(max_length=16, unique=True)
+    num_q = models.CharField(max_length=16)
     
 class Mapping_radio(models.Model):
     num_q = models.CharField(max_length=16, primary_key=True, unique=True)
