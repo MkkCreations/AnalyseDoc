@@ -1,7 +1,6 @@
 import os
 import json
 from pypdf import PdfReader, PdfWriter
-from trp.t_pipeline import pipeline_merge_tables
 import trp.trp2 as t2
 from textractcaller.t_call import call_textract, Textract_Features, Textract_Types
 from textractprettyprinter.t_pretty_print import (
@@ -15,9 +14,6 @@ from trp.t_tables import MergeOptions, HeaderFooterType
 import boto3
 import pandas as pd
 from trp import Document
-from textractprettyprinter.t_pretty_print import convert_table_to_list
-from IPython.display import display
-from trp.t_pipeline import order_blocks_by_geo
 import re
 
 textract_client = boto3.client("textract")
@@ -34,11 +30,12 @@ def uploadS3(s3BucketName, documentName, diligenceId, documentType):
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
+    docName = documentName.split("/")[-1]
     response = client.start_document_analysis(
         DocumentLocation={
             "S3Object": {
                 "Bucket": s3BucketName,
-                "Name": str(diligenceId + "/" + documentType + "/" + documentName),
+                "Name": str(diligenceId + "/" + documentType + "/" + docName),
             }
         },
         FeatureTypes=["TABLES"],
@@ -50,8 +47,29 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
         response = client.get_document_analysis(JobId=job_id)
         status = response["JobStatus"]
         print("Job status: {}".format(status))
-
     return response
+
+
+def make_chunk_of_tables(response):
+    chunks = []
+    current_chunk = []
+
+    blocks = response
+    print(type(blocks))
+    for block in blocks:
+        block_type = block["BlockType"]
+
+        if block_type == "PAGE":
+            if current_chunk:
+                chunks.append(current_chunk)
+                current_chunk = []
+
+        current_chunk.append(block)
+
+    if current_chunk:
+        chunks.append(current_chunk)
+
+    return chunks
 
 
 def split_pdf_and_process_tables(file, s3BucketName, diligenceId, documentType):
@@ -100,9 +118,6 @@ def format_wolfsberg_as_dict(wolfsberg_data):
             }
             objects.append(obj)
 
-    for item in objects:
-        print(item)
-
     return objects
 
 
@@ -136,15 +151,15 @@ def format_table_object(
         )
         if object:
             ici_data.append(object)
-    print(ici_data)
     return ici_data
 
 
-def find_by_tables():
+def find_by_tables(path, document_type, diligence_id):
     s3BucketName = "inputanalyze"
-    documentName = "./media/documents/1/BNP-WOLFSBERG-1-3.pdf"
-    documentType = "WOLFSBERG"
-    diligenceId = "1"
+    documentPath = os.path.realpath(".") + "{path}".format(path=path)
+    # documentName = "./media/documents/1/wolfsbergBNP-Paribas-France.pdf"
+    # documentType = "WOLFSBERG"
+    # diligenceId = "1"
     wolfsberg_to_ici_data = [
         {"wolfsberg": "19", "ici": "4.7"},
         {"wolfsberg": "9i", "ici": "4.5"},
@@ -157,19 +172,24 @@ def find_by_tables():
         {"wolfsberg": "10", "ici": "6.11"},
     ]
 
-    uploadS3(s3BucketName, documentName, diligenceId, documentType)
-    textract_json = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
+    uploadS3(s3BucketName, documentPath, diligence_id, document_type)
+    textract_json = get_kv_map(s3BucketName, documentPath, diligence_id, document_type)
     confidence_list = get_confidence_of_table(textract_json, len(wolfsberg_to_ici_data))
-    csv_table_formatted = get_string(
+
+    csv_table_formatted = get_tables_string(
         textract_json=textract_json,
         table_format=Pretty_Print_Table_Format.csv,
-        output_type=[Textract_Pretty_Print.TABLES],
     )
     array_of_questions_answer = csv_table_formatted.split("\r\n")
-    format_table_object(
+    table_result = format_table_object(
         array_of_questions_answer, wolfsberg_to_ici_data, confidence_list
     )
+    return table_result
 
 
 if __name__ == "__main__":
-    find_by_tables()
+    find_by_tables(
+        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
+        document_type="wolfsberg",
+        diligence_id="1",
+    )
