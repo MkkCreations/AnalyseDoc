@@ -156,15 +156,10 @@ function Questions(doc) {
         console.log(questions[key]);
     }
 
-    const handleDisable = (e) => {
-        e.preventDefault();
-        setEdit(true);
-    }
-
     useEffect(() => {
-
         if (doc.doc.id !== undefined) {
             fetchQuestions();
+            console.log(questions);
         }
     }, [edit, setEdit, doc, setQuestions])
 
@@ -180,18 +175,16 @@ function Questions(doc) {
                         <form onChange={(e)=>handleChange(key,e)}>
                             {questions[key].Type === 'R' ?
                                 <div> 
-                                    <div>{questions[key].AiAnswer}</div>
-                                    <label>Yes</label>
-                                    <input type='radio' name={key} value={'yes'} defaultChecked={questions[key].Answer === 'True'?true:false} />
+                                   <label>Yes</label>
+                                    <input type='radio' name={key} value={'Yes'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'Yes'?true:false} />
                                     <label>No</label>
-                                    <input type='radio' name={key} value={'no'} defaultChecked={questions[key].Answer === 'False'?true:false} />
-                                    <p>{questions[key].AnswerType === 'H' ? '100%' : ''}</p>
+                                    <input type='radio' name={key} value={'No'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'No'?true:false} />
+                                    <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                 </div>
                                 : 
                                 <div>
-                                    <input type='text' name={key[2]} disabled={true} value={questions[key].Answer? questions[key].Answer : ''} />
-                                    <p>{questions[key].AnswerType === 'H' ? '100%' : ''}</p>
-                                    <button onClick={handleDisable}>Edit</button>
+                                    <input type='text' name={key[2]} disabled={true} value={questions[key].Answer? questions[key].Answer : questions[key].AiAnswer} />
+                                    <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                 </div>
                             }
                         </form>

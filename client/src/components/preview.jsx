@@ -8,7 +8,7 @@ import { Question } from './model/Question';
 function Preview() {
     const {user, client} = useAuth();
     const [questions, setQuestions] = useState({});
-    const [edit, setEdit] = useState(false);
+    const [search, setSearch] = useState(false);
 
     const fetchQuestions = async () => {
         try {
@@ -29,6 +29,7 @@ function Preview() {
         if (e.target.value === '') {
             fetchQuestions();
         } else {
+            setSearch(true);
             Object.keys(questions).map(key => {
                 if (!questions[key].NumQ.toLowerCase().includes(e.target.value.toLowerCase()) && !questions[key].Question.toLowerCase().includes(e.target.value.toLowerCase())) {
                     delete questions[key];
@@ -38,6 +39,7 @@ function Preview() {
             )
             setQuestions({...questions});
         }
+        search === true && e.target.value === '' && setSearch(false);
     }
 
     const handleFilter = (e) => {
@@ -65,7 +67,7 @@ function Preview() {
     }
 
     const handleChange = (key, e) => {
-        if (questions[key].Type() === 'R') {
+        if (questions[key].Type === 'R') {
             if (e.target.value === 'yes') {
                 questions[key].Answer = true;
                 questions[key].AnswerType = 'H';
@@ -81,8 +83,6 @@ function Preview() {
         const answer = {
             id: questions[key].IdAnswer,
             answer: questions[key].Answer,
-            answer_type: questions[key].AnswerTyp,
-            id_q: questions[key].Id,
             id_dili: user.dili.id
         }
         putAnswer(answer);
@@ -91,11 +91,13 @@ function Preview() {
         setQuestions({...questions});
     }
 
-    const handleDisable = (e) => {
+    const handleAccept = (key, e) => {
         e.preventDefault();
-        e.target.form[0].disabled = !e.target.form[0].disabled;
-        e.target.form[1].innerHTML = e.target.form[1].innerHTML === 'Edit' ? 'Save' : 'Edit';
-        setEdit(!edit);
+        
+        const answer = {
+            id: questions[key].IdAnswer,
+        }
+        putAnswer(answer);
     }
 
     const putAnswer = async (answer) => {
@@ -107,8 +109,8 @@ function Preview() {
     }
 
     useEffect(() => {
-        fetchQuestions();
-    }, []);
+        if (!search) fetchQuestions();
+    }, [search, questions]);
 
     return (
         <div className="preview">
@@ -151,10 +153,11 @@ function Preview() {
                                             </div>
                                             : 
                                             <div>
-                                                <input type='text' name={key[2]} disabled={true} value={questions[key].AiAnswer? questions[key].AiAnswer : ''} />
+                                                <input type='text' name={key[2]} defaultValue={questions[key].Answer? questions[key].Answer : questions[key].AiAnswer} />
                                                 <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                                 <p>{questions[key].documentName}</p>
-                                                <button onClick={handleDisable}>Edit</button>
+                                                <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'none':'unset'}}>Accept</button>
+                                                <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'unset':'none'}}>Delete</button>
                                             </div>
                                         }
                                     </form>

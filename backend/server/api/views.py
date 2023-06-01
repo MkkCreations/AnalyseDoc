@@ -29,7 +29,6 @@ class LoginView(views.APIView):
         serializer = serializers.LoginSerializer(data=self.request.data, context={ 'request': self.request })
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        
         login(request, user)
         return Response(serializers.UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
 
@@ -243,7 +242,10 @@ class DiligenceView(View):
         diligences = list(Diligence.objects.filter(id=id).values())
         if len(diligences) > 0:
             Diligence.objects.filter(id=id).delete()
-            os.remove('media/{path}'.format(path=id))
+            try:
+                os.remove('media/{path}'.format(path=id))
+            except:
+                pass
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}
@@ -264,7 +266,7 @@ class AnswerView(View):
             else:
                 datos={'message': 'Not found...'}
             return JsonResponse(datos)
-        elif id_dili != "" and doc_id != "":
+        elif id_dili != "" and doc_id != 0:
             answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili, doc_id=doc_id)
             if len(answers) > 0:
                 answer = answers
@@ -289,11 +291,18 @@ class AnswerView(View):
             
     def put(self, request):
         jd = json.loads(request.body)
-        answers = list(Answer.objects.filter(diligence_id=jd['id_dili'], question_id=jd['id_q']).values())
+        print(jd)
+        answers = list(Answer.objects.filter(id=jd['id']).values())
         if len(answers) > 0:
-            ans = Answer.objects.get(diligence_id=jd['id_dili'], question_id=jd['id_q'])
-            ans.answer=jd['answer']
-            ans.answer_type=jd['answer_type']
+            ans = Answer.objects.get(id=jd['id'])
+            print(ans)
+            if jd.__len__() > 1:
+                ans.answer=jd['answer']
+                ans.answer_type='H'
+                ans.ai_confidence=0
+            else:
+                ans.ai_confidence=100
+                ans.ai_res_accepted=True
             ans.save()
             datos={'message': 'Success'}
         else: 

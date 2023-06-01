@@ -14,7 +14,7 @@ class User(models.Model):
 # ======================================== #
 class Question(models.Model):
     num_q = models.CharField(max_length=32, unique=True)
-    question = models.CharField(max_length=200)
+    question = models.CharField(max_length=600)
     type = models.CharField(max_length=32)
     parent = models.CharField(max_length=32, null=True)
 
@@ -33,7 +33,7 @@ class Diligence(models.Model):
             answers = Answer.objects.filter(diligence=dili)
         else:
             doc_type = Document.objects.get(id=doc_id).docType
-            answers = Answer.objects.filter(diligence=dili, answer_type=doc_type)
+            answers = Answer.objects.filter(diligence=dili, document_name=doc_type)
         for answer in answers:
             questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type, 'document_name': answer.document_name}]
         return questions
@@ -48,6 +48,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
+    ai_res_accepted = models.BooleanField(default=False)
     
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:
