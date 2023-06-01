@@ -42,6 +42,31 @@ In this project, the main task is to perform a Due Deligence with only the inser
 <p>4- Create the migrations</p>
 
 ```shell
-  backend$ python3 manage.py make
+  backend/server$ python3 manage.py makemigrations
+  backend/server$ python3 manage.py migrate
+```
 
 <p>5- Run the server</p>
+
+```shell
+  backend/server$ python3 manage.py runserver
+```
+
+<p>6- Initialize the FrontEnd</p>
+
+```shell
+  client$ npm install
+```
+
+<p>7- Run the FrontEnd server</p>
+
+```shell
+  client$ npm run start
+```
+
+<h6><i>Go to http://localhost:3000</i></h6>
+
+
+
+
+
