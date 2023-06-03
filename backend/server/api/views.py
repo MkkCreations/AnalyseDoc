@@ -214,12 +214,11 @@ class DiligenceView(View):
     def post(self, request):
         jd = json.loads(request.body)
         Diligence.objects.create(dili_name=jd['dili_name'], date=str(datetime.now()))
-        user = User.objects.get(id=jd['user_id'])
         newDili = list(Diligence.objects.filter(dili_name=jd['dili_name']).values())[0]
         questions = list(Question.objects.all().values())
         for question in questions:
             quest = Question.objects.get(id=question['id'])
-            Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=user.id)
+            Answer.objects.create(question=quest, diligence_id=newDili['id'])
         datos={'message': 'Success', 'diligence': newDili}
         return JsonResponse(datos)
     
@@ -360,6 +359,8 @@ class DocumentView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         post_serializer = serializers.DocumentSerializer(data=request.data)
+        print(post_serializer.is_valid())
+        print(request.data)
         if post_serializer.is_valid():
             post_serializer.save()
             path = post_serializer.data.get('document')

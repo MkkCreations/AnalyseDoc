@@ -194,7 +194,7 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def find_by_queries(path, document_type, dilligence_id):
-    s3BucketName = "inputanalyze"
+    s3BucketName = "s3analysedoc"
     documentPath = os.path.realpath(".") + "{path}".format(path=path)
     res = []
 
@@ -209,9 +209,9 @@ def find_by_queries(path, document_type, dilligence_id):
     return res
 
 
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     find_by_queries(
         path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
         document_type="wolfsberg",
         dilligence_id="1",
-    )
+    ) """

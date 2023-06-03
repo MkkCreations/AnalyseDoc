@@ -1,11 +1,10 @@
 import './styles/new.css';
 import { useAuth } from '../context/authContext';
-import Header from './header';
 import axios from 'axios';
 import { useState } from 'react';
 
 function New({setNewDili, edit=false, dili={}}) {
-    const {user, setUser} = useAuth();
+    const {user} = useAuth();
     const [message, setMessage] = useState("");
 
     const handleChange = (e) => {
@@ -18,7 +17,6 @@ function New({setNewDili, edit=false, dili={}}) {
         console.log(e.target[0].value);
         const data = {
             dili_name: e.target[0].value,
-            user_id: user.data.id
         }
         APIDiligences(data);
         e.target[0].value = "";
@@ -27,7 +25,7 @@ function New({setNewDili, edit=false, dili={}}) {
     const APIDiligences = async (data) => {
         try {
             if(edit) {
-                await axios.put('http://127.0.0.1:8000/api/diligences/', {id: dili[0], dili_name: data.dili_name, user_id: data.user_id})
+                await axios.put('http://127.0.0.1:8000/api/diligences/', {id: dili[0], dili_name: data.dili_name})
                     .then(res => {
                         console.log(res);
                 })

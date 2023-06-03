@@ -11,6 +11,7 @@ import NavDiligence from './components/navDiligence';
 import Preview from './components/preview';
 import Documents from './components/documents';
 import Account from './components/account';
+import Dashboard from './components/dashboard';
 
 
 function App() {
@@ -43,6 +44,12 @@ function App() {
             <ProtectedRoute>
               <NavDiligence />
               <Documents />
+            </ProtectedRoute>
+          }/>
+          <Route path='/dili/dashboard' element={
+            <ProtectedRoute>
+              <NavDiligence />
+              <Dashboard />
             </ProtectedRoute>
           }/>
           <Route path='/account' element={

@@ -1,15 +1,9 @@
 from typing import Any, Dict, Tuple
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
-# ======================================== #
-class User(models.Model):
-    email = models.CharField(max_length=32, unique=True)
-    name = models.CharField(max_length=32)
-    username = models.CharField(max_length=32, unique=True)
-    password = models.CharField(max_length=32)
-    last_login = models.DateTimeField(auto_now=True)
 
 # ======================================== #
 class Question(models.Model):
@@ -46,7 +40,7 @@ class Answer(models.Model):
     answer_type = models.CharField(max_length=32, null=True)
     document_name = models.CharField(max_length=64, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
     ai_res_accepted = models.BooleanField(default=False)
     
@@ -115,7 +109,7 @@ def upload_to(instance, filename):
 class Document(models.Model):
     name = models.CharField(max_length=32)
     document = models.FileField(upload_to=upload_to)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.IntegerField(User, null=True)
     docType = models.CharField(max_length=32, null=True)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now=True)

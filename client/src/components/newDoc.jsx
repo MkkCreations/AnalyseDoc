@@ -84,6 +84,7 @@ function NewDoc({setNewDoc, edit=false, docs, docData=[], setLoading}) {
         } catch (error) {
             console.log(error);
             setError(error.message);
+            setLoading(false);
         }
     }
 
