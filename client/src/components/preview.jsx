@@ -9,6 +9,7 @@ function Preview() {
     const {user, client} = useAuth();
     const [questions, setQuestions] = useState({});
     const [search, setSearch] = useState(false);
+    const [fetch, setFetch] = useState(false);
 
     const fetchQuestions = async () => {
         try {
@@ -45,7 +46,7 @@ function Preview() {
     const handleFilter = (e) => {
         if (e.target.value === 'nonAnswered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer !== null || questions[key].AiAnswer !== null) {
+                if (questions[key].Answer != null || questions[key].AiAnswer != null) {
                     delete questions[key];
                 }
                 return '';
@@ -54,7 +55,7 @@ function Preview() {
             setQuestions({...questions});
         } else if (e.target.value === 'answered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer === null || questions[key].AiAnswer === null) {
+                if (questions[key].Answer == null && questions[key].AiAnswer == null) {
                     delete questions[key];
                 }
                 return '';
@@ -86,8 +87,6 @@ function Preview() {
             id_dili: user.dili.id
         }
         putAnswer(answer);
-
-        console.log(questions);
         setQuestions({...questions});
     }
 
@@ -96,8 +95,20 @@ function Preview() {
         
         const answer = {
             id: questions[key].IdAnswer,
+            res_acceptation: 1
         }
         putAnswer(answer);
+    }
+    
+    const handleDelete = (key, e) => {
+        e.preventDefault();
+        
+        const answer = {
+            id: questions[key].IdAnswer,
+            res_acceptation: -1
+        }
+        putAnswer(answer);
+        e.target.form[0].value = '';
     }
 
     const putAnswer = async (answer) => {
@@ -110,7 +121,7 @@ function Preview() {
 
     useEffect(() => {
         if (!search) fetchQuestions();
-    }, [search, questions]);
+    }, [search, fetch]);
 
     return (
         <div className="preview">
@@ -156,8 +167,10 @@ function Preview() {
                                                 <input type='text' name={key[2]} defaultValue={questions[key].Answer? questions[key].Answer : questions[key].AiAnswer} />
                                                 <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                                 <p>{questions[key].documentName}</p>
-                                                <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'none':'unset'}}>Accept</button>
-                                                <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'unset':'none'}}>Delete</button>
+                                                <div>
+                                                    <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'none':'unset'}}>Accept</button>
+                                                    <button onClick={(e) => handleDelete(key, e)} style={{display: questions[key].AiAnswer || questions[key].Answer ?'unset':'none'}}>Delete</button>
+                                                </div>
                                             </div>
                                         }
                                     </form>

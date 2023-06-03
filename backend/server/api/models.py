@@ -42,7 +42,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     diligence = models.ForeignKey(Diligence, on_delete=models.CASCADE)
-    ai_res_accepted = models.BooleanField(default=False)
+    ai_res_accepted = models.IntegerField(default=0)
     
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:

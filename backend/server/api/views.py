@@ -295,13 +295,24 @@ class AnswerView(View):
         if len(answers) > 0:
             ans = Answer.objects.get(id=jd['id'])
             print(ans)
-            if jd.__len__() > 1:
+            if jd.__len__() > 2:
                 ans.answer=jd['answer']
                 ans.answer_type='H'
                 ans.ai_confidence=0
             else:
-                ans.ai_confidence=100
-                ans.ai_res_accepted=True
+                if jd['res_acceptation'] == 1:
+                    ans.ai_confidence=100
+                    ans.ai_res_accepted=jd['res_acceptation']
+                else:
+                    if ans.ai_res != '':
+                        ans.ai_res_accepted=jd['res_acceptation']
+                    else:
+                        ans.ai_res_accepted=0
+                    ans.ai_confidence=0
+                    ans.ai_res = ''
+                    ans.answer = ''
+                    ans.answer_type=''
+                    ans.document_name=''
             ans.save()
             datos={'message': 'Success'}
         else: 
@@ -426,4 +437,51 @@ class MappingView(View):
                 return response
         except:
             return JsonResponse({'message':'Failed'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
+
+
+#========================================
+class DashboardView(View):
     
+    def get(self, request, id_dili=0):
+        responses = Answer.objects.filter(diligence_id=Diligence.objects.get(id=id_dili)).values()
+        data = {
+            'total_q':0,
+            'total_res':0,
+            'total_ai_res':0,
+            'total_human_res':0,
+            'total_res_accepted':0,
+            'total_res_rejected':0,
+            'total_res_pending':0,
+            'total_docs':0,
+            'docs':{'Wolfsberg':0, 'ESMA':0, 'SIRENE':0, 'KBIS':0}
+        }
+        
+        data['total_docs'] = len(Document.objects.filter(diligence_id=id_dili))
+        
+        for res in responses:
+            data['total_q'] = data['total_q'] + 1
+            
+            if res.get('answer_type') == "AI":
+                data['total_ai_res'] = data['total_ai_res'] + 1
+                data['total_res'] = data['total_res'] + 1
+            if res.get('answer_type') == "H":
+                data['total_human_res'] = data['total_human_res'] + 1
+                data['total_res'] = data['total_res'] + 1
+                
+            if res.get('ai_res_accepted') == 1:
+                data['total_res_accepted'] = data['total_res_accepted'] + 1
+            elif res.get('ai_res_accepted') == -1:
+                data['total_res_rejected'] = data['total_res_rejected'] + 1
+            else:
+                data['total_res_pending'] = data['total_res_pending'] + 1
+            
+            if res.get('document_name') == "wolfsberg":
+                data['docs']['Wolfsberg'] = data['docs']['Wolfsberg'] + 1 
+            elif res.get('document_name') == "esma":
+                data['docs']['ESMA'] = data['docs']['ESMA'] + 1 
+            elif res.get('document_name') == "kbis":
+                data['docs']['KBIS'] = data['docs']['KBIS'] + 1 
+            elif res.get('document_name') == "sirene":
+                data['docs']['SIRENE'] = data['docs']['SIRENE'] + 1 
+        
+        return JsonResponse(data, status=status.HTTP_200_OK, safe=False)

@@ -2,14 +2,14 @@
 
 .header {
     width: 95%;
-    padding: 2%;
+    padding: 1%;
     background-color: var(--bgb) !important;
     border-radius: 5px;
     color: rgb(240, 240, 240) ;
     text-align: center;
     margin: 2% auto;
     position: sticky;
-    top: 2%;
+    top: 1%;
     z-index: 2;
 }
 
