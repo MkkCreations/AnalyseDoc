@@ -20,16 +20,12 @@ INSERT INTO api_mapping_text VALUES (122, '4.2')
 INSERT INTO api_mapping_text VALUES (152, '4.5a')
 INSERT INTO api_mapping_text VALUES (154, '5.1a.1')
 INSERT INTO api_mapping_text VALUES (155, '5.1b.1')
-
 INSERT INTO api_mapping_text VALUES (205, 'name')
 INSERT INTO api_mapping_text VALUES (206, 'title')
 INSERT INTO api_mapping_text VALUES (207, 'signature')
 INSERT INTO api_mapping_text VALUES (208, 'date')
 INSERT INTO api_mapping_text VALUES (209, 'email address')
 INSERT INTO api_mapping_text VALUES (210, 'telephone number')
-
-
-
 
 INSERT INTO api_mapping_radio VALUES ('2.1', 'R41', 'R42', 'R43')
 INSERT INTO api_mapping_radio VALUES ('2.6', 'R44', 'R45', 'R46')
