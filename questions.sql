@@ -74,3 +74,13 @@ INSERT INTO api_question (num_q, question, type, parent) VALUES("6.14", "Will yo
 INSERT INTO api_question (num_q, question, type, parent) VALUES("6.15", "Are all records relating to AML / KYC maintained in accordance with the applicable local law, and will be made available upon request to the extent permitted by law?", "R", "6.15");
 
 
+
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.1", "What is the level of assets that you currently distribute, manage, or make available to trade or introduce in investment funds as per the latest quarter or annual report available?", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.2", "Please confirm how you will trade with the fund", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.3", "Business context. Please select the type(s) of business or distribution activity that best describe(s) your business:", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.4", "Please select the applicable types of services you provide to your clients:", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.5", "What type of underlying investors do you typically distribute investment funds to?", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("2.6a", "f yes, can you restrict by jurisdiction, product, or any other parameter? Please select all that apply", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("4.2", "What type of sub-distributors do you rely on? Please select all that apply", "C", null);
+INSERT INTO api_question (num_q, question, type, parent) VALUES ("6.10", "Select all the applicable policies that you have in place:", "C", null);
+

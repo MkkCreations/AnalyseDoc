@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 # ======================================== #
 class Question(models.Model):
-    num_q = models.CharField(max_length=32, unique=True)
+    num_q = models.CharField(max_length=32)
     question = models.CharField(max_length=600)
     type = models.CharField(max_length=32)
     parent = models.CharField(max_length=32, null=True)
@@ -28,8 +28,33 @@ class Diligence(models.Model):
         else:
             doc_type = Document.objects.get(id=doc_id).docType
             answers = Answer.objects.filter(diligence=dili, document_name=doc_type)
+            
         for answer in answers:
-            questions[answer.question.id] = [{'id_q': answer.question.id, 'num_q': answer.question.num_q, 'question': answer.question.question, 'type': answer.question.type, 'parent': answer.question.parent},{'id_res': answer.id , 'ai_confidence': answer.ai_confidence, 'ai_res': answer.ai_res, 'answer': answer.answer, 'answer_type': answer.answer_type, 'document_name': answer.document_name}]
+            questions[answer.question.id] = [
+                {
+                'id_q': answer.question.id, 
+                'num_q': answer.question.num_q, 
+                'question': answer.question.question, 
+                'type': answer.question.type, 
+                'parent': answer.question.parent
+                },{
+                'id_res': answer.id , 
+                'ai_confidence': answer.ai_confidence, 
+                'ai_res': answer.ai_res, 
+                'answer': answer.answer, 
+                'answer_type': answer.answer_type, 
+                'document_name': answer.document_name, 
+                'ai_res_accepted': answer.ai_res_accepted
+                },
+                []
+            ]
+            if answer.question.type == 'C':
+                checkboxs = Mapping_checkBox.objects.filter(num_q=answer.question.num_q)
+                for check in checkboxs:
+                    questions[answer.question.id][2].append({
+                        'num_q': check.num_q,
+                        'data_q': check.data_q
+                    })
         return questions
 
 # ======================================== #
@@ -47,29 +72,33 @@ class Answer(models.Model):
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:
             try:
-                answer = Answer.objects.filter(diligence=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
+                answer = Answer.objects.filter(diligence_id=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
                 answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'], document_name=key['document_type'])
             except:
                 pass
     
     def clear_ai_answers(diligence_id, doc_name):
-        answers = Answer.objects.filter(diligence=diligence_id, answer_type='AI', document_name=doc_name)
+        answers = Answer.objects.filter(diligence_id=diligence_id, answer_type='AI', document_name=doc_name)
         answers.update(ai_res=None, ai_confidence=None, answer_type=None, document_name=None)
 
     # =================== Fonction pour automatiser le mapping ==================== #
     def get_mapping_num(diligence_id):
         resultats = []
-        answers = Answer.objects.filter(diligence=diligence_id)
+        answers = Answer.objects.filter(diligence_id=diligence_id)
+        print(len(answers))
+
         try:
             for answer in answers:
+                print(answer.question.num_q, answer.answer)
                 if answer.question.type == 'T':
                     mapping = Mapping_text.objects.get(num_q=answer.question.num_q)
                     resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map, 'answer': answer.answer})
                 elif answer.question.type == 'R':
+                    print(answer.question.num_q)
                     mapping = Mapping_radio.objects.get(num_q=answer.question.num_q)
-                    if answer.answer == 'Yes':
+                    if answer.answer == 'Yes' or answer.ai_res == 'Yes':
                         resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_yes})
-                    elif answer.answer == 'No':
+                    elif answer.answer == 'No' or answer.ai_res == 'No':
                         resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_no})
                     else:
                         pass
@@ -80,6 +109,7 @@ class Answer(models.Model):
                     pass
         except:
             pass
+        
         return resultats
 
 
@@ -92,7 +122,7 @@ class Mapping_radio(models.Model):
     num_q = models.CharField(max_length=16, primary_key=True, unique=True)
     num_map_yes = models.CharField(max_length=32, unique=True)
     num_map_no = models.CharField(max_length=32, unique=True)
-    num_map_nan = models.CharField(max_length=32, null=True, unique=True)
+    num_map_nan = models.CharField(max_length=32, null=True)
     
 class Mapping_checkBox(models.Model):
     num_q = models.CharField(max_length=16)

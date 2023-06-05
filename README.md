@@ -69,7 +69,6 @@ In this project, the main task is to perform a Due Deligence with only the inser
 
 
 
-<h3>Login</h3>
 <img src="./samples/login.png" />
 <h3>Home</h3>
 <img src="./samples/home.png" />

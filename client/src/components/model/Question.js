@@ -12,8 +12,10 @@ export class Question {
     _answer;
     _answerType;
     _documentName;
+    _resAccepted;
+    _checkboxs;
 
-    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType, aiConfidence, documentName) {
+    constructor(id, numQ, question, type, parent, idAnswer, aiAnswer, answer, answerType, aiConfidence, documentName, resAccepted, checkboxs=[]) {
         this._id = id;
         this._numQ = numQ;
         this._question = question;
@@ -24,7 +26,9 @@ export class Question {
         this._answer = answer;
         this._answerType = answerType;
         this._aiConfidence = aiConfidence;
-        this.documentName = documentName;
+        this._documentName = documentName;
+        this._resAccepted = resAccepted;
+        this._checkboxs = checkboxs;
     }
 
     get Id() {
@@ -108,6 +112,22 @@ export class Question {
 
     set documentName(value) {
         this._documentName = value;
+    }
+
+    get resAccepted() {
+        return this._resAccepted;
+    }
+
+    set resAccepted(value) {
+        this._resAccepted = value;
+    }
+
+    get checkboxs() {
+        return this._checkboxs;
+    }
+
+    set checkboxs(value) {
+        this._checkboxs = value;
     }
 
 }
