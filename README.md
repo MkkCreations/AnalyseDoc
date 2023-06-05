@@ -40,20 +40,26 @@ In this project, the main task is to perform a Due Deligence with only the inser
   backend$ pip install -r requirements.txt
 ```
 
-<p>4- Create the migrations</p>
+<p>4- Activate the virtual environment</p>
+
+```shell
+  backend$ source ./env/bin/activate
+```
+
+<p>5- Create the migrations</p>
 
 ```shell
   backend/server$ python3 manage.py makemigrations
   backend/server$ python3 manage.py migrate
 ```
 
-<p>5- Run the server</p>
+<p>6- Run the server</p>
 
 ```shell
   backend/server$ python3 manage.py runserver
 ```
 
-<p>6- Initialize the FrontEnd</p>
+<p>7- Initialize the FrontEnd</p>
 
 ```shell
   client$ npm install
