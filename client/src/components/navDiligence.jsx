@@ -36,6 +36,7 @@ function NavDiligence() {
                     </div>
                     <CustomLink to={`/dili`}>Preview</CustomLink>
                     <CustomLink to={`/dili/docs`}>Documents</CustomLink>
+                    <CustomLink to={`/dili/dashboard`}>Dashboard</CustomLink>
                 </span>
                 <span>
                     <CustomLink to='/projects'>Projects</CustomLink>

@@ -8,14 +8,16 @@ import { Question } from './model/Question';
 function Preview() {
     const {user, client} = useAuth();
     const [questions, setQuestions] = useState({});
-    const [edit, setEdit] = useState(false);
+    const [search, setSearch] = useState(false);
+    const [fetch, setFetch] = useState(false);
 
     const fetchQuestions = async () => {
         try {
             await client.get(`answers/${user.dili.id}/0`)
                 .then(res => {
+                    console.log(res);
                     for (const key in res.data.data) {
-                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence, res.data.data[key][1].document_name);
+                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence, res.data.data[key][1].document_name, res.data.data[key][1].ai_res_accepted, res.data.data[key][2]);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
@@ -29,6 +31,7 @@ function Preview() {
         if (e.target.value === '') {
             fetchQuestions();
         } else {
+            setSearch(true);
             Object.keys(questions).map(key => {
                 if (!questions[key].NumQ.toLowerCase().includes(e.target.value.toLowerCase()) && !questions[key].Question.toLowerCase().includes(e.target.value.toLowerCase())) {
                     delete questions[key];
@@ -38,22 +41,25 @@ function Preview() {
             )
             setQuestions({...questions});
         }
+        search === true && e.target.value === '' && setSearch(false);
     }
 
     const handleFilter = (e) => {
         if (e.target.value === 'nonAnswered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer !== null) {
+                if (questions[key].Answer != null || questions[key].AiAnswer != null) {
                     delete questions[key];
                 }
+                return '';
             }
             )
             setQuestions({...questions});
         } else if (e.target.value === 'answered') {
             Object.keys(questions).map(key => {
-                if (questions[key].Answer === null) {
+                if (questions[key].Answer == null && questions[key].AiAnswer == null) {
                     delete questions[key];
                 }
+                return '';
             }
             )
             setQuestions({...questions});
@@ -63,12 +69,13 @@ function Preview() {
     }
 
     const handleChange = (key, e) => {
-        if (questions[key].Type() === 'R') {
-            if (e.target.value === 'yes') {
-                questions[key].Answer = true;
+        console.log(e.target.value);
+        if (questions[key].Type === 'R') {
+            if (e.target.value === 'Yes') {
+                questions[key].Answer = 'Yes';
                 questions[key].AnswerType = 'H';
             } else {
-                questions[key].Answer = false;
+                questions[key].Answer = 'No';
                 questions[key].AnswerType = 'H';
             }
         } else {
@@ -79,21 +86,31 @@ function Preview() {
         const answer = {
             id: questions[key].IdAnswer,
             answer: questions[key].Answer,
-            answer_type: questions[key].AnswerTyp,
-            id_q: questions[key].Id,
             id_dili: user.dili.id
         }
         putAnswer(answer);
-
-        console.log(questions);
         setQuestions({...questions});
     }
 
-    const handleDisable = (e) => {
+    const handleAccept = (key, e) => {
         e.preventDefault();
-        e.target.form[0].disabled = !e.target.form[0].disabled;
-        e.target.form[1].innerHTML = e.target.form[1].innerHTML === 'Edit' ? 'Save' : 'Edit';
-        setEdit(!edit);
+        
+        const answer = {
+            id: questions[key].IdAnswer,
+            res_acceptation: 1
+        }
+        putAnswer(answer);
+    }
+    
+    const handleDelete = (key, e) => {
+        e.preventDefault();
+        
+        const answer = {
+            id: questions[key].IdAnswer,
+            res_acceptation: -1
+        }
+        putAnswer(answer);
+        e.target.form[0].value = '';
     }
 
     const putAnswer = async (answer) => {
@@ -105,8 +122,8 @@ function Preview() {
     }
 
     useEffect(() => {
-        fetchQuestions();
-    }, []);
+        if (!search) fetchQuestions();
+    }, [search, fetch]);
 
     return (
         <div className="preview">
@@ -139,20 +156,45 @@ function Preview() {
                                 <hr />
                                 <div>
                                     <form onChange={(e)=>handleChange(key,e)}>
+                                        {questions[key].Type === 'C'?
+                                            <div className='checkbox'>
+                                                {Object.values(questions[key].checkboxs).map(
+                                                    (checkbox, index) => {
+                                                        return <div key={index}>
+                                                            {console.log(checkbox, index)}
+                                                            <input type='checkbox' name={checkbox.num_q} value={checkbox} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer.includes(checkbox)?true:false: questions[key].Answer? questions[key].Answer.includes(checkbox)?true:false:false} />
+                                                            <label>{checkbox.data_q}</label>
+                                                        </div>
+                                                    }
+                                                )}
+                                            </div>
+                                            :
+                                            ''
+                                        }
                                         {questions[key].Type === 'R' ?
                                             <div> 
                                                 <label>Yes</label>
-                                                <input type='radio' name={key} value={'Yes'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'Yes'?true:false} />
+                                                <input type='radio' name={key} value={'Yes'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'Yes'?true:false} />
                                                 <label>No</label>
-                                                <input type='radio' name={key} value={'No'} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer: questions[key].Answer === 'No'?true:false} />
+                                                <input type='radio' name={key} value={'No'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'No'?true:false} />
                                                 <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                             </div>
-                                            : 
+                                            :
+                                            ''
+                                        }
+                                        {questions[key].Type === 'T' ?
                                             <div>
-                                                <input type='text' name={key[2]} disabled={true} value={questions[key].AiAnswer? questions[key].AiAnswer : ''} />
-                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}{questions[key].documentName}</p>
-                                                <button onClick={handleDisable}>Edit</button>
+                                                <input type='text' name={key[2]} defaultValue={questions[key].Answer? questions[key].Answer : questions[key].AiAnswer} />
+                                                <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
+                                                <p>{questions[key].documentName}</p>
+                                                <p>{questions[key].resAccepted === 1?'Accepted':''}</p>
+                                                <div>
+                                                    <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'none':'unset'}}>Accept</button>
+                                                    <button onClick={(e) => handleDelete(key, e)} style={{display: questions[key].AiAnswer || questions[key].Answer ?'unset':'none'}}>Delete</button>
+                                                </div>
                                             </div>
+                                            :
+                                            ''
                                         }
                                     </form>
                                 </div>

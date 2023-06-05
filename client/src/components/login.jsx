@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import userPhoto from '../samples/usr.png';
 import pwdPhoto from '../samples/pwd.png';
+import CryptoJS from 'crypto-js';
 
 
 function Login() {
@@ -28,9 +29,10 @@ function Login() {
             setError("Username is required");
             return;
         } 
+        const pwd = CryptoJS.enc.Base64.stringify(CryptoJS.SHA256(userLogin.pwd));
         const data = {
             username: userLogin.usr,
-            password: userLogin.pwd
+            password: pwd
         }
         try {
             await login(data);

@@ -2,6 +2,7 @@ import './styles/login.css';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
+import CryptoJS from 'crypto-js';
 
 function Signup() {
     const [userRegister, setUserRegister] = useState({
@@ -27,7 +28,7 @@ function Signup() {
             setError("Passwords don't match");
             return;
         } else
-        if (name === "pwd" && value.length < 8) {
+        if ((name === "pwd" || name === "pwd2") && value.length < 8) {
             setError("Password must be at least 8 characters long");
             return;
         } else {
@@ -41,10 +42,11 @@ function Signup() {
             setError("All fields are required");
             return;
         }
+        const pwd = CryptoJS.enc.Base64.stringify(CryptoJS.SHA256(userRegister.pwd));
         const data = {
             username: userRegister.usr,
-            password: userRegister.pwd,
-            password2: userRegister.pwd2,
+            password: pwd,
+            password2: pwd,
             first_name: userRegister.firstName,
             last_name: userRegister.lastName,
             email: userRegister.email

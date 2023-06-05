@@ -29,7 +29,6 @@ class LoginView(views.APIView):
         serializer = serializers.LoginSerializer(data=self.request.data, context={ 'request': self.request })
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        
         login(request, user)
         return Response(serializers.UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
 
@@ -215,12 +214,11 @@ class DiligenceView(View):
     def post(self, request):
         jd = json.loads(request.body)
         Diligence.objects.create(dili_name=jd['dili_name'], date=str(datetime.now()))
-        user = User.objects.get(id=jd['user_id'])
         newDili = list(Diligence.objects.filter(dili_name=jd['dili_name']).values())[0]
         questions = list(Question.objects.all().values())
         for question in questions:
             quest = Question.objects.get(id=question['id'])
-            Answer.objects.create(question=quest, diligence_id=newDili['id'], user_id=user.id)
+            Answer.objects.create(question=quest, diligence_id=newDili['id'])
         datos={'message': 'Success', 'diligence': newDili}
         return JsonResponse(datos)
     
@@ -243,7 +241,10 @@ class DiligenceView(View):
         diligences = list(Diligence.objects.filter(id=id).values())
         if len(diligences) > 0:
             Diligence.objects.filter(id=id).delete()
-            os.remove('media/{path}'.format(path=id))
+            try:
+                os.remove('media/{path}'.format(path=id))
+            except:
+                pass
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}
@@ -264,7 +265,7 @@ class AnswerView(View):
             else:
                 datos={'message': 'Not found...'}
             return JsonResponse(datos)
-        elif id_dili != "" and doc_id != "":
+        elif id_dili != "" and doc_id != 0:
             answers = Diligence.get_questions_answers(self=Diligence ,dili=id_dili, doc_id=doc_id)
             if len(answers) > 0:
                 answer = answers
@@ -289,11 +290,29 @@ class AnswerView(View):
             
     def put(self, request):
         jd = json.loads(request.body)
-        answers = list(Answer.objects.filter(diligence_id=jd['id_dili'], question_id=jd['id_q']).values())
+        print(jd)
+        answers = list(Answer.objects.filter(id=jd['id']).values())
         if len(answers) > 0:
-            ans = Answer.objects.get(diligence_id=jd['id_dili'], question_id=jd['id_q'])
-            ans.answer=jd['answer']
-            ans.answer_type=jd['answer_type']
+            ans = Answer.objects.get(id=jd['id'])
+            print(ans)
+            if jd.__len__() > 2:
+                ans.answer=jd['answer']
+                ans.answer_type='H'
+                ans.ai_confidence=0
+            else:
+                if jd['res_acceptation'] == 1:
+                    ans.ai_confidence=100
+                    ans.ai_res_accepted=jd['res_acceptation']
+                else:
+                    if ans.ai_res != '':
+                        ans.ai_res_accepted=jd['res_acceptation']
+                    else:
+                        ans.ai_res_accepted=0
+                    ans.ai_confidence=0
+                    ans.ai_res = ''
+                    ans.answer = ''
+                    ans.answer_type=''
+                    ans.document_name=''
             ans.save()
             datos={'message': 'Success'}
         else: 
@@ -351,6 +370,8 @@ class DocumentView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         post_serializer = serializers.DocumentSerializer(data=request.data)
+        print(post_serializer.is_valid())
+        print(request.data)
         if post_serializer.is_valid():
             post_serializer.save()
             path = post_serializer.data.get('document')
@@ -386,8 +407,10 @@ class DocumentView(views.APIView):
     def delete(self, request, id_dili, id_doc):
         documents = list(Document.objects.filter(id=id_doc).values())
         if len(documents) > 0:
+            doc_type = Document.objects.filter(id=id_doc).values()[0]['docType']
             Document.objects.filter(id=id_doc).delete()
             os.remove('TextractQueries/media/{path}'.format(path=documents[0]['document']))
+            Answer.clear_ai_answers(diligence_id=id_dili, doc_name=doc_type)
             datos={'message': 'Success'}
         else:
             datos={'message': 'Not found...'}
@@ -407,11 +430,57 @@ class MappingView(View):
         dili = Diligence.objects.get(id=id_dili)
         dili.ici = path
         try:
-            print(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}')
             with open(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}', 'rb') as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
                 return response
         except:
             return JsonResponse({'message':'Failed'}, status=status.HTTP_400_BAD_REQUEST, safe=False)
+
+
+#========================================
+class DashboardView(View):
     
+    def get(self, request, id_dili=0):
+        responses = Answer.objects.filter(diligence_id=Diligence.objects.get(id=id_dili)).values()
+        data = {
+            'total_q':0,
+            'total_res':0,
+            'total_ai_res':0,
+            'total_human_res':0,
+            'total_res_accepted':0,
+            'total_res_rejected':0,
+            'total_res_pending':0,
+            'total_docs':0,
+            'docs':{'Wolfsberg':0, 'ESMA':0, 'SIRENE':0, 'KBIS':0}
+        }
+        
+        data['total_docs'] = len(Document.objects.filter(diligence_id=id_dili))
+        
+        for res in responses:
+            data['total_q'] = data['total_q'] + 1
+            
+            if res.get('answer_type') == "AI":
+                data['total_ai_res'] = data['total_ai_res'] + 1
+                data['total_res'] = data['total_res'] + 1
+            if res.get('answer_type') == "H":
+                data['total_human_res'] = data['total_human_res'] + 1
+                data['total_res'] = data['total_res'] + 1
+                
+            if res.get('ai_res_accepted') == 1:
+                data['total_res_accepted'] = data['total_res_accepted'] + 1
+            elif res.get('ai_res_accepted') == -1:
+                data['total_res_rejected'] = data['total_res_rejected'] + 1
+            else:
+                data['total_res_pending'] = data['total_res_pending'] + 1
+            
+            if res.get('document_name') == "wolfsberg":
+                data['docs']['Wolfsberg'] = data['docs']['Wolfsberg'] + 1 
+            elif res.get('document_name') == "esma":
+                data['docs']['ESMA'] = data['docs']['ESMA'] + 1 
+            elif res.get('document_name') == "kbis":
+                data['docs']['KBIS'] = data['docs']['KBIS'] + 1 
+            elif res.get('document_name') == "sirene":
+                data['docs']['SIRENE'] = data['docs']['SIRENE'] + 1 
+        
+        return JsonResponse(data, status=status.HTTP_200_OK, safe=False)

@@ -89,4 +89,4 @@ class DocumentSerializer(serializers.ModelSerializer):
 class DocumentSerializer2(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ('id', 'name', 'document', 'user_id', 'docType', 'diligence_id', 'date')
+        fields = ('id', 'name', 'document', 'user', 'docType', 'diligence_id', 'date')
