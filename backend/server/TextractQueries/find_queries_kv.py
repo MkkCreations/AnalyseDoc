@@ -146,20 +146,22 @@ def get_result_and_confidence(
             print(f"--------- Page {i} ---------")
             page = d.pages[i]
             query_answers = d.get_query_answers(page=page)
-            counter = 0 % (len(confidence_list) - 1)
+            print(query_answers)
+            counter = 0 % (len(confidence_list))
             for x in query_answers:
-                print(counter)
+                print(x[2], res.count(f"{x[1]},{x[2]}") == 0)
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
                     query_object = format_queries_as_dict(
                         x[1], x[2], confidence_list[counter], documentType
                     )
+                    print(query_object)
                     for object in res:
                         if object["no_ici"] == x[1]:
                             object["answer"] = f'{object["answer"]}, {x[2]}'
                             no_ici_exists = True
-                    if not no_ici_exists:
-                        res.append(query_object)
-                        no_ici_exists = False  
+                if not no_ici_exists:
+                    res.append(query_object)
+                no_ici_exists = False
                 counter += 1            
         except:
             continue
@@ -172,10 +174,10 @@ def get_confidence_score(query_response):
     for block in query_result:
         if block["BlockType"] == "QUERY_RESULT":
             confidence_list.append(block["Confidence"])
-        print(confidence_list)
     return confidence_list
 
 def format_queries_as_dict(question_number, answer, confidence_score, documentType):
+    print("in format_queries_as_dict")
     return {
         "no_ici": question_number,
         "answer": answer,
@@ -257,7 +259,7 @@ def find_by_queries(path, document_type, dilligence_id):
 
 if __name__ == "__main__":
     find_by_queries(
-        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
-        document_type="wolfsberg",
+        path="/media/documents/1/SIRENE-BNP.pdf",
+        document_type="sirene",
         dilligence_id="1",
     )
