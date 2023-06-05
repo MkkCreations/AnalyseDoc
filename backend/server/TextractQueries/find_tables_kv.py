@@ -15,7 +15,7 @@ import boto3
 import pandas as pd
 from trp import Document
 import re
-import split_and_merge_pdf as splitter
+from .split_and_merge_pdf import pdf_splitter
 
 textract_client = boto3.client("textract")
 
@@ -49,7 +49,7 @@ def get_kv_map(s3_bucket_name, documentName, diligenceId, documentType):
         DocumentLocation={
             "S3Object": {
                 "Bucket": s3_bucket_name,
-                "Name": str(diligenceId + "/" + documentType + "/" + docName),
+                "Name": f'{diligenceId}/{documentType}/{docName}',
             }
         },
         FeatureTypes=["TABLES"],
@@ -119,15 +119,15 @@ def search_for_wolfsberg_answer(
     return None
 
 def find_by_tables(path, document_type, diligence_id):
-    s3_bucket_name = "inputanalyze"
+    s3_bucket_name = "s3analysedoc"
     document_path = os.path.realpath(".") + "{path}".format(path=path)
-    directory_path = f'{os.path.realpath(".")}/media/documents/{diligence_id}'
+    directory_path = f'{os.path.realpath(".")}/TextractQueries/media/documents/{diligence_id}'
     merged_document_name = f'merged_{document_path.split("/")[-1]}'
     merged_document_path = f'{directory_path}/{merged_document_name}'
     print(merged_document_path)
     
 
-    splitter.pdf_splitter(document_path, page_to_keep_wolfsberg, diligence_id)
+    pdf_splitter(document_path, page_to_keep_wolfsberg, diligence_id)
     upload_to_s3(s3_bucket_name=s3_bucket_name, document_to_upload=merged_document_path, bucket_path=f'{diligence_id}/{document_type}/{merged_document_name}')
     textract_json = get_kv_map(s3_bucket_name, merged_document_path, diligence_id, document_type)
     confidence_list = get_confidence_of_table(textract_json, len(wolfsberg_to_ici_data))
@@ -144,9 +144,10 @@ def find_by_tables(path, document_type, diligence_id):
     return response
 
 
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     find_by_tables(
         path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
         document_type="wolfsberg",
         diligence_id="1",
     )
+ """

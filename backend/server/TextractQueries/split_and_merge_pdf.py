@@ -11,15 +11,15 @@ def pdf_splitter(input_path, pages_to_keep, diligence_id=1):
         if index + 1 in pages_to_keep:
             pdf_writer.add_page(page)
 
-    output_filename = f'./media/documents/{diligence_id}/merged_{fname}.pdf'
+    output_filename = f'media/documents/{diligence_id}/merged_{fname}.pdf'
     print(output_filename)
-
-    with open(output_filename, 'wb') as out:
+    with open(f'{os.path.abspath(".")}/TextractQueries/{output_filename}', 'wb') as out:
         pdf_writer.write(out)
+    return output_filename
 
   
-if __name__ == '__main__':
+""" if __name__ == '__main__':
     path = './media/documents/1/wolfsbergBNP-Paribas-France.pdf'
     pages_to_keep = [5, 2, 8, 11, 4]
 
-    pdf_splitter(path, pages_to_keep)
+    pdf_splitter(path, pages_to_keep) """

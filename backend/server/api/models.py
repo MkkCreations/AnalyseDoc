@@ -26,6 +26,7 @@ class Diligence(models.Model):
         if doc_id is None:
             answers = Answer.objects.filter(diligence=dili)
         else:
+            print(doc_id)
             doc_type = Document.objects.get(id=doc_id).docType
             answers = Answer.objects.filter(diligence=dili, document_name=doc_type)
             

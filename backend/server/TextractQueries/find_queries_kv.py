@@ -2,7 +2,7 @@ import trp.trp2 as t2
 import time
 import boto3
 import os
-import split_and_merge_pdf as splitter
+from .split_and_merge_pdf import pdf_splitter
 
 tempo = time.time()
 
@@ -109,10 +109,10 @@ chiffre_cles = [
 
 def split_factory(input_path, dilligence_id, document_type):
     if document_type.lower() == "wolfsberg":
-        splitter.pdf_splitter(input_path, page_to_keep_wolfsberg, dilligence_id)
+        pdf_splitter(input_path, page_to_keep_wolfsberg, dilligence_id)
         return True
     elif document_type.lower() == "esma":
-        splitter.pdf_splitter(input_path, page_to_keep_esma, dilligence_id)
+        pdf_splitter(input_path, page_to_keep_esma, dilligence_id)
         return True
     return False
 
@@ -232,9 +232,9 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def find_by_queries(path, document_type, dilligence_id):
-    s3_bucket_name = "inputanalyze"
+    s3_bucket_name = "s3analysedoc"
     document_path = os.path.realpath(".") + "{path}".format(path=path)
-    directory_path = f'{os.path.realpath(".")}/media/documents/{dilligence_id}'
+    directory_path = f'{os.path.realpath(".")}/TextractQueries/media/documents/{dilligence_id}'
     merged_document_name = f'merged_{document_path.split("/")[-1]}'
     normal_document_name = document_path.split("/")[-1]
     merged_document_path = f'{directory_path}/{merged_document_name}'
@@ -256,6 +256,8 @@ def find_by_queries(path, document_type, dilligence_id):
     print(tempo2 - tempo)
     print(response)
     return response
+
+
 
 if __name__ == "__main__":
     find_by_queries(

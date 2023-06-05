@@ -16,6 +16,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 import os
 from TextractQueries.find_queries_kv import find_by_queries
+from TextractQueries.find_tables_kv import find_by_tables
 from Mapping.pdfrwModul import mapping
 
 # Create your views here.
@@ -378,9 +379,11 @@ class DocumentView(views.APIView):
             doc_type = post_serializer.data.get('docType')
             diligence_id = post_serializer.data.get('diligence')
             
-            res_ai = find_by_queries(path, doc_type, diligence_id)
-            print(res_ai)
-            Answer.ai_response_parser(ai_res=res_ai, diligence_id=diligence_id)
+            res_ai_q = find_by_queries(path, doc_type, diligence_id)
+            Answer.ai_response_parser(ai_res=res_ai_q, diligence_id=diligence_id)
+            if doc_type == "Wolfsberg":
+                res_ai_t = find_by_tables(path, doc_type, diligence_id)
+                Answer.ai_response_parser(ai_res=res_ai_t, diligence_id=diligence_id)
             return JsonResponse('Success', status=status.HTTP_201_CREATED, safe=False)
         return JsonResponse('Failed', status=status.HTTP_400_BAD_REQUEST, safe=False)
     
@@ -452,7 +455,7 @@ class DashboardView(View):
             'total_res_rejected':0,
             'total_res_pending':0,
             'total_docs':0,
-            'docs':{'Wolfsberg':0, 'ESMA':0, 'SIRENE':0, 'KBIS':0}
+            'docs':{'Wolfsberg':0, 'ESMA':0, 'SIRENE':0, 'KBIS':0, 'MiFID2':0}
         }
         
         data['total_docs'] = len(Document.objects.filter(diligence_id=id_dili))
@@ -482,5 +485,7 @@ class DashboardView(View):
                 data['docs']['KBIS'] = data['docs']['KBIS'] + 1 
             elif res.get('document_name') == "sirene":
                 data['docs']['SIRENE'] = data['docs']['SIRENE'] + 1 
+            elif res.get('document_name') == "mifid2":
+                data['docs']['MiFID2'] = data['docs']['MiFID2'] + 1 
         
         return JsonResponse(data, status=status.HTTP_200_OK, safe=False)

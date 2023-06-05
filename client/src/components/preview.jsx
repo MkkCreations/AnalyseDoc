@@ -17,7 +17,7 @@ function Preview() {
                 .then(res => {
                     console.log(res);
                     for (const key in res.data.data) {
-                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, res.data.data[key][1].ai_confidence, res.data.data[key][1].document_name, res.data.data[key][1].ai_res_accepted, res.data.data[key][2]);
+                        const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, Number(res.data.data[key][1].ai_confidence).toFixed(0), res.data.data[key][1].document_name, res.data.data[key][1].ai_res_accepted, res.data.data[key][2]);
                         questions[key] = question;
                     }
                     setQuestions({...questions});
@@ -69,7 +69,7 @@ function Preview() {
     }
 
     const handleChange = (key, e) => {
-        console.log(e.target.value);
+        console.log(e);
         if (questions[key].Type === 'R') {
             if (e.target.value === 'Yes') {
                 questions[key].Answer = 'Yes';
@@ -78,7 +78,18 @@ function Preview() {
                 questions[key].Answer = 'No';
                 questions[key].AnswerType = 'H';
             }
-        } else {
+        } else if(questions[key].Type === 'C') {
+            let inputs = document.getElementsByName(e.target.name)
+            let answer = '';
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i].checked) {
+                    answer += inputs[i].value + ', ';
+                }
+            }
+            answer = answer.slice(0, -2);
+            questions[key].Answer = answer;
+        
+        }else {
             questions[key].Answer = e.target.value;
             questions[key].AnswerType = 'H';
 
@@ -161,8 +172,7 @@ function Preview() {
                                                 {Object.values(questions[key].checkboxs).map(
                                                     (checkbox, index) => {
                                                         return <div key={index}>
-                                                            {console.log(checkbox, index)}
-                                                            <input type='checkbox' name={checkbox.num_q} value={checkbox} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer.includes(checkbox)?true:false: questions[key].Answer? questions[key].Answer.includes(checkbox)?true:false:false} />
+                                                            <input type='checkbox' name={checkbox.num_q} value={checkbox.data_q} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer.includes(checkbox.data_q)?true:false: questions[key].Answer? questions[key].Answer.includes(checkbox.data_q)?true:false:false} />
                                                             <label>{checkbox.data_q}</label>
                                                         </div>
                                                     }

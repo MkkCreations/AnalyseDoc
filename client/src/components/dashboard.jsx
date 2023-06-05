@@ -63,6 +63,7 @@ function Dashboard() {
                                     <ProgressBar progress={((data.docs.KBIS/data.total_res)*100).toFixed(1)} label={"KBIS"} indicatorColor={(data.docs.KBIS/data.total_res) < 0.5?'#8245a6':'#07c'}/>
                                     <ProgressBar progress={((data.docs.ESMA/data.total_res)*100).toFixed(1)} label={"ESMA"} indicatorColor={(data.docs.ESMA/data.total_res) < 0.5?'#8245a6':'#07c'}/>
                                     <ProgressBar progress={((data.docs.SIRENE/data.total_res)*100).toFixed(1)} label={"SIRENE"} indicatorColor={(data.docs.SIRENE/data.total_res) < 0.5?'#8245a6':'#07c'}/>
+                                    <ProgressBar progress={((data.docs.MiFID2/data.total_res)*100).toFixed(1)} label={"MiFID2"} indicatorColor={(data.docs.MiFID2/data.total_res) < 0.5?'#8245a6':'#07c'}/>
                                 </div>
                             </div>
                             <h3>Acceptations</h3>

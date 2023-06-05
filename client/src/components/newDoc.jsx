@@ -5,7 +5,7 @@ import { useAuth } from '../context/authContext';
 
 function NewDoc({setNewDoc, edit=false, docs, docData=[], setLoading}) {
     const {user, client} = useAuth();
-    const [docsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "Other"]);
+    const [docsType] = useState(["Wolfsberg", "ESMA", "KBIS", "SIRENE", "MiFID2", "Other"]);
     const [doc, setDoc] = useState({
         user: user.data.id,
         dili: user.dili.id,
