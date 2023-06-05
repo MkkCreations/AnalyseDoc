@@ -430,7 +430,6 @@ class MappingView(View):
         dili = Diligence.objects.get(id=id_dili)
         dili.ici = path
         try:
-            print(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}')
             with open(f'{os.path.realpath(".")}/TextractQueries/media/ici/{path}', 'rb') as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment;filename={path}'.format(path=path)
