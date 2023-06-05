@@ -2,8 +2,12 @@ import trp.trp2 as t2
 import time
 import boto3
 import os
+import split_and_merge_pdf as splitter
 
 tempo = time.time()
+
+page_to_keep_wolfsberg = [1, 2, 5]
+page_to_keep_esma = [1]
 
 wolfsberg = [
     {
@@ -25,7 +29,7 @@ wolfsberg = [
     {
         "Text": "Does the firm require sub distributors to certify that they meet regulatory requirements for AML or KYC compliance",
         "Alias": "4.7",
-        "Pages": ["2", "5"],
+        "Pages": ["3"],
     },
     {
         "Text": "Internal Risk management function",
@@ -45,7 +49,7 @@ wolfsberg = [
 ]
 
 esma = [
-    {"Text": "Is the entity regulated ?", "Alias": "1.4", "Pages": ["1"]},
+    {"Text": "Does the entity type manage money, yes or no ?", "Alias": "1.4", "Pages": ["1"]},
     {
         "Text": "What are the services name of the current activities ?",
         "Alias": "2.4",
@@ -96,8 +100,17 @@ chiffre_cles = [
     {"Text": "Produit net bancaire ? ", "Alias": "2.1", "Pages": ["1"]},
 ]
 
+def split_factory(input_path, dilligence_id, document_type):
+    if document_type.lower() == "wolfsberg":
+        splitter.pdf_splitter(input_path, page_to_keep_wolfsberg, dilligence_id)
+        return True
+    elif document_type.lower() == "esma":
+        splitter.pdf_splitter(input_path, page_to_keep_esma, dilligence_id)
+        return True
+    return False
 
-def uploadS3(s3BucketName, documentName, diligenceId, documentType):
+
+def upload_to_s3(s3BucketName, documentName, diligenceId, documentType):
     docName = documentName.split("/")[-1]
     s3 = boto3.client("s3")
     s3.upload_file(
@@ -109,13 +122,7 @@ def uploadS3(s3BucketName, documentName, diligenceId, documentType):
     )
 
 
-def get_confidence_score(query_response):
-    confidence_list = []
-    query_result = query_response["Blocks"]
-    for block in query_result:
-        if block["BlockType"] == "QUERY_RESULT":
-            confidence_list.append(block["Confidence"])
-    return confidence_list
+
 
 
 def get_result_and_confidence(
@@ -124,6 +131,7 @@ def get_result_and_confidence(
     data = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
     confidence_list = get_confidence_score(data)
     d = t2.TDocumentSchema().load(data)
+    no_ici_exists = False
     # print("confidence", confidence)
     for i in range(len(d.pages)):
         try:
@@ -133,12 +141,26 @@ def get_result_and_confidence(
             for x in query_answers:
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
                     query_object = format_queries_as_dict(
-                        x[1], x[2], confidence_list[i]
+                        x[1], x[2], confidence_list[i], documentType.lower()
                     )
-                    res.append(query_object)
+                    for object in res:
+                        if object["no_ici"] == x[1]:
+                            object["answer"] = f'{object["answer"]}, {x[2]}'
+                            no_ici_exists = True
+                    if not no_ici_exists:
+                        res.append(query_object)
+                        no_ici_exists = False                
         except:
             continue
 
+
+def get_confidence_score(query_response):
+    confidence_list = []
+    query_result = query_response["Blocks"]
+    for block in query_result:
+        if block["BlockType"] == "QUERY_RESULT":
+            confidence_list.append(block["Confidence"])
+    return confidence_list
 
 def format_queries_as_dict(question_number, answer, confidence_score):
     return {
@@ -148,20 +170,19 @@ def format_queries_as_dict(question_number, answer, confidence_score):
         "document_type": "wolfsberg",
     }
 
-
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
     client = boto3.client("textract")
     docName = documentName.split("/")[-1]
     queryType = None
-    docType = documentType.lower()
+    document_type = documentType.lower()
 
-    if docType == "wolfsberg":
+    if document_type == "wolfsberg":
         queryType = wolfsberg
-    elif docType == "esma":
+    elif document_type == "esma":
         queryType = esma
-    elif docType == "sirene":
+    elif document_type == "sirene":
         queryType = sirene
-    elif docType == "mifid2":
+    elif document_type == "mifid2":
         queryType = mifid2
 
     response = client.start_document_analysis(
@@ -194,24 +215,32 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
 
 
 def find_by_queries(path, document_type, dilligence_id):
-    s3BucketName = "s3analysedoc"
-    documentPath = os.path.realpath(".") + "{path}".format(path=path)
+    s3_bucket_name = "inputanalyze"
+    document_path = os.path.realpath(".") + "{path}".format(path=path)
+    directory_path = f'{os.path.realpath(".")}/media/documents/{dilligence_id}'
+    merged_document_name = f'merged_{document_path.split("/")[-1]}'
+    normal_document_name = document_path.split("/")[-1]
+    merged_document_path = f'{directory_path}/{merged_document_name}'
     res = []
 
-    uploadS3(s3BucketName, documentPath, dilligence_id, document_type)
-    get_result_and_confidence(
-        s3BucketName, documentPath, dilligence_id, document_type, res
-    )
-    tempo2 = time.time()
-    print(tempo2 - tempo)
-    print(res)
-    
+
+    split_made = split_factory(document_path, dilligence_id, document_type)
+    if split_made:
+        upload_to_s3(s3_bucket_name, merged_document_path, dilligence_id, document_type)
+        get_result_and_confidence(
+        s3_bucket_name, merged_document_path, dilligence_id, document_type, res
+        )
+    else: 
+        upload_to_s3(s3_bucket_name, document_path, dilligence_id, document_type)
+        get_result_and_confidence(
+        s3_bucket_name, document_path, dilligence_id, document_type, res
+        )
+    tempo2 = time.time()    
     return res
 
-
-""" if __name__ == "__main__":
+if __name__ == "__main__":
     find_by_queries(
-        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
-        document_type="wolfsberg",
+        path="/media/documents/1/SIRENE-BNP.pdf",
+        document_type="sirene",
         dilligence_id="1",
-    ) """
+    )
