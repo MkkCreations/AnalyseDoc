@@ -114,6 +114,7 @@ def search_for_wolfsberg_answer(
                 "no_ici": ICI_question_number,
                 "answer": item["Answer"],
                 "confidence_score": confidence_score,
+                "document_type": "wolfsberg",
             }
     return None
 
@@ -126,7 +127,7 @@ def find_by_tables(path, document_type, diligence_id):
     print(merged_document_path)
     
 
-    splitter.pdf_splitter(document_path, directory_path, page_to_keep_wolfsberg, diligence_id)
+    splitter.pdf_splitter(document_path, page_to_keep_wolfsberg, diligence_id)
     upload_to_s3(s3_bucket_name=s3_bucket_name, document_to_upload=merged_document_path, bucket_path=f'{diligence_id}/{document_type}/{merged_document_name}')
     textract_json = get_kv_map(s3_bucket_name, merged_document_path, diligence_id, document_type)
     confidence_list = get_confidence_of_table(textract_json, len(wolfsberg_to_ici_data))
@@ -135,11 +136,12 @@ def find_by_tables(path, document_type, diligence_id):
         table_format=Pretty_Print_Table_Format.csv,
     )
     array_of_questions_answer = csv_table_formatted.split("\r\n")
-    table_result = format_table_object(
+    response = format_table_object(
         array_of_questions_answer, wolfsberg_to_ici_data, confidence_list
     )
-    print(table_result)
-    return table_result
+    print(response)
+
+    return response
 
 
 if __name__ == "__main__":

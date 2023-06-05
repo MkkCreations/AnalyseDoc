@@ -63,28 +63,35 @@ sirene = [
 
 mifid2 = [
     {
-        "Text": "Does the firm has an internal process for the review and approval of new fund products to be distributed?",
-        "Alias": "REVIEW_APPROVAL",
+        "Text": "Does the firm has an internal process for the review and approval of new fund products to be distributed, yes or no?",
+        "Alias": "3.1",
+        "Pages": ["*"],
     },
     {
-        "Text": "Does the entity distribute or make available investment funds in any jurisdiction other than your domiciled country?",
-        "Alias": "DISTRIBUTE_INVESTMENT",
+        "Text": "Does the entity distribute or make available investment funds in any jurisdiction other than your domiciled country, yes or no?",
+        "Alias": "3.2",
+        "Pages": ["*"],
     },
     {
-        "Text": "Does the entity distribute or market investment funds in accordance with the applicable rules and regulations ?",
-        "Alias": "DISTRIBUTE_MARKET",
+        "Text": "Does the entity distribute or market investment funds in accordance with the applicable rules and regulations, yes or no ?",
+        "Alias": "3.2a",
+        "Pages": ["*"],
     },
     {
-        "Text": "Where required by law, does the entity disclose to investors any inducements your firm receives from fund manufacturers and all fees  collected for distribution or placement activities?",
-        "Alias": "DISCLOSE_INVESTORS",
+        "Text": "Where required by law, does the entity disclose to investors any inducements your firm receives from fund manufacturers and all fees  collected for distribution or placement activities, yes or no?",
+        "Alias": "3.7",
+        "Pages": ["*"],
+
     },
     {
-        "Text": "Does the entity reasonably apply a suitability test or other applicable standard of care to determine that investment funds offered to customers meet their needs?",
-        "Alias": "SUITABILITY_TEST",
+        "Text": "Does the entity reasonably apply a suitability test or other applicable standard of care to determine that investment funds offered to customers meet their needs, yes or no ?",
+        "Alias": "3.8",
+        "Pages": ["*"],
     },
     {
-        "Text": "Does the entity provide regular reporting or MiFID target market confirmations to the investment fund manufacturer or sponsor?",
-        "Alias": "REGULAR_REPORTING",
+        "Text": "Does the entity provide regular reporting or MiFID target market confirmations to the investment fund manufacturer or sponsor, yes or no ?",
+        "Alias": "3.12",
+        "Pages": ["*"],
     },
 ]
 
@@ -126,12 +133,13 @@ def upload_to_s3(s3BucketName, documentName, diligenceId, documentType):
 
 
 def get_result_and_confidence(
-    s3BucketName, documentName, diligenceId, documentType, res
+    s3BucketName, documentName, diligenceId, documentType
 ):
     data = get_kv_map(s3BucketName, documentName, diligenceId, documentType)
     confidence_list = get_confidence_score(data)
     d = t2.TDocumentSchema().load(data)
     no_ici_exists = False
+    res = []
     # print("confidence", confidence)
     for i in range(len(d.pages)):
         try:
@@ -141,7 +149,7 @@ def get_result_and_confidence(
             for x in query_answers:
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
                     query_object = format_queries_as_dict(
-                        x[1], x[2], confidence_list[i], documentType.lower()
+                        x[1], x[2], confidence_list[i], documentType
                     )
                     for object in res:
                         if object["no_ici"] == x[1]:
@@ -152,6 +160,7 @@ def get_result_and_confidence(
                         no_ici_exists = False                
         except:
             continue
+    return res
 
 
 def get_confidence_score(query_response):
@@ -162,12 +171,12 @@ def get_confidence_score(query_response):
             confidence_list.append(block["Confidence"])
     return confidence_list
 
-def format_queries_as_dict(question_number, answer, confidence_score):
+def format_queries_as_dict(question_number, answer, confidence_score, documentType):
     return {
         "no_ici": question_number,
         "answer": answer,
         "confidence_score": confidence_score,
-        "document_type": "wolfsberg",
+        "document_type": documentType.lower(),
     }
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
@@ -184,6 +193,8 @@ def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
         queryType = sirene
     elif document_type == "mifid2":
         queryType = mifid2
+    elif document_type == "corporation":
+        queryType = corporation
 
     response = client.start_document_analysis(
         DocumentLocation={
@@ -221,26 +232,28 @@ def find_by_queries(path, document_type, dilligence_id):
     merged_document_name = f'merged_{document_path.split("/")[-1]}'
     normal_document_name = document_path.split("/")[-1]
     merged_document_path = f'{directory_path}/{merged_document_name}'
-    res = []
+    response = None
 
 
     split_made = split_factory(document_path, dilligence_id, document_type)
     if split_made:
         upload_to_s3(s3_bucket_name, merged_document_path, dilligence_id, document_type)
-        get_result_and_confidence(
-        s3_bucket_name, merged_document_path, dilligence_id, document_type, res
+        response = get_result_and_confidence(
+        s3_bucket_name, merged_document_path, dilligence_id, document_type
         )
     else: 
         upload_to_s3(s3_bucket_name, document_path, dilligence_id, document_type)
-        get_result_and_confidence(
-        s3_bucket_name, document_path, dilligence_id, document_type, res
+        response = get_result_and_confidence(
+        s3_bucket_name, document_path, dilligence_id, document_type
         )
-    tempo2 = time.time()    
-    return res
+    tempo2 = time.time()
+    print(tempo2 - tempo)
+    print(response)
+    return response
 
 if __name__ == "__main__":
     find_by_queries(
-        path="/media/documents/1/SIRENE-BNP.pdf",
-        document_type="sirene",
+        path="/media/documents/1/MiFID2-bnp.pdf",
+        document_type="mifid2",
         dilligence_id="1",
     )
