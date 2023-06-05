@@ -22,19 +22,19 @@ wolfsberg = [
         "Pages": ["1"],
     },
     {
-        "Text": "Are sub-distributors regulated for distribution of investment funds and are regulated for the purposes of AML ?",
+        "Text": "Has the Entity documented policies andprocedures consistent with applicable ABC regulations and requirements to [reasonably]prevent, detect and report bribery and corruption ?",
         "Alias": "4.3",
         "Pages": ["2"],
     },
     {
-        "Text": "Does the firm require sub distributors to certify that they meet regulatory requirements for AML or KYC compliance",
+        "Text": "Does the Entity verify the identity of the customer ?",
         "Alias": "4.7",
         "Pages": ["3"],
     },
     {
-        "Text": "Internal Risk management function",
+        "Text": "Risk based approach, yes or no ?",
         "Alias": "6.1",
-        "Pages": ["*"],
+        "Pages": ["3"],
     },
     {
         "Text": "What is the registred address",
@@ -146,10 +146,12 @@ def get_result_and_confidence(
             print(f"--------- Page {i} ---------")
             page = d.pages[i]
             query_answers = d.get_query_answers(page=page)
+            counter = 0 % (len(confidence_list) - 1)
             for x in query_answers:
+                print(counter)
                 if x[2] and res.count(f"{x[1]},{x[2]}") == 0:
                     query_object = format_queries_as_dict(
-                        x[1], x[2], confidence_list[i], documentType
+                        x[1], x[2], confidence_list[counter], documentType
                     )
                     for object in res:
                         if object["no_ici"] == x[1]:
@@ -157,7 +159,8 @@ def get_result_and_confidence(
                             no_ici_exists = True
                     if not no_ici_exists:
                         res.append(query_object)
-                        no_ici_exists = False                
+                        no_ici_exists = False  
+                counter += 1            
         except:
             continue
     return res
@@ -169,6 +172,7 @@ def get_confidence_score(query_response):
     for block in query_result:
         if block["BlockType"] == "QUERY_RESULT":
             confidence_list.append(block["Confidence"])
+        print(confidence_list)
     return confidence_list
 
 def format_queries_as_dict(question_number, answer, confidence_score, documentType):
@@ -253,7 +257,7 @@ def find_by_queries(path, document_type, dilligence_id):
 
 if __name__ == "__main__":
     find_by_queries(
-        path="/media/documents/1/MiFID2-bnp.pdf",
-        document_type="mifid2",
+        path="/media/documents/1/wolfsbergBNP-Paribas-France.pdf",
+        document_type="wolfsberg",
         dilligence_id="1",
     )
