@@ -92,12 +92,13 @@ function Diligence({diligence, fetchDiligences}) {
     }
 
     const handleDelete = async (dili) => {
-        window.confirm('Are you sure you want to delete this project?');
-        await axios.delete(`http://127.0.0.1:8000/api/diligences/${dili}`)
-                .then(res => {
-                    console.log(res);
-            });
-        fetchDiligences();
+        if (window.confirm('Are you sure you want to delete this project?')) {
+            await axios.delete(`http://127.0.0.1:8000/api/diligences/${dili}`)
+                    .then(res => {
+                        console.log(res);
+                });
+            fetchDiligences();
+        }
     }
 
     useEffect(() => {

@@ -98,7 +98,7 @@ function DocField({doc, getDocs, setSelectedDoc, docs, setLoading}) {
                     console.log(res);
                 });
         setSettings(false);
-        setSelectedDoc();
+        setSelectedDoc('');
     }
 
     useEffect(() => {
