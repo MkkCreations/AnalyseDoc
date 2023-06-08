@@ -73,7 +73,7 @@ class Answer(models.Model):
     def ai_response_parser(ai_res, diligence_id):
         for key in ai_res:
             try:
-                answer = Answer.objects.filter(diligence_id=diligence_id, question=Question.objects.get(num_q=key['no_ici']))
+                answer = Answer.objects.filter(diligence_id=diligence_id, question_id=Question.objects.get(num_q=key['no_ici']))
                 answer.update(ai_res=key['answer'], answer_type='AI', ai_confidence=key['confidence_score'], document_name=key['document_type'])
             except:
                 pass
@@ -85,32 +85,38 @@ class Answer(models.Model):
     # =================== Fonction pour automatiser le mapping ==================== #
     def get_mapping_num(diligence_id):
         resultats = []
-        answers = Answer.objects.filter(diligence_id=diligence_id)
+        answers = Answer.objects.filter(diligence_id=diligence_id, answer_type__in=['AI', 'H'])
         print(len(answers))
 
-        try:
-            for answer in answers:
-                print(answer.question.num_q, answer.answer)
-                if answer.question.type == 'T':
-                    mapping = Mapping_text.objects.get(num_q=answer.question.num_q)
+
+        for answer in answers:
+            print(answer.question.type)
+            if answer.question.type == 'T':
+                mapping = Mapping_text.objects.get(num_q=answer.question.num_q)
+                if not answer.answer:
+                    resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map, 'answer': answer.ai_res})
+                else:
                     resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map, 'answer': answer.answer})
-                elif answer.question.type == 'R':
-                    print(answer.question.num_q)
-                    mapping = Mapping_radio.objects.get(num_q=answer.question.num_q)
-                    if answer.answer == 'Yes' or answer.ai_res == 'Yes':
-                        resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_yes})
-                    elif answer.answer == 'No' or answer.ai_res == 'No':
-                        resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_no})
-                    else:
-                        pass
-                elif answer.question.type == 'C':
-                    mapping = Mapping_checkBox.objects.get(num_q=answer.question.num_q, data_q=answer.answer)
-                    resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map})
+                    
+            elif answer.question.type == 'R':
+                print(answer.question.num_q)
+                mapping = Mapping_radio.objects.get(num_q=answer.question.num_q)
+                if str(answer.answer).lower() == 'yes' or str(answer.ai_res).lower() == 'yes':
+                    resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_yes})
+                elif str(answer.answer).lower() == 'no' or str(answer.ai_res).lower() == 'no':
+                    resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map_no})
                 else:
                     pass
-        except:
-            pass
-        
+            elif answer.question.type == 'C':
+                if not answer.answer or not answer.ai_res:
+                    pass
+                else:
+                    mapping = Mapping_checkBox.objects.get(num_q=answer.question.num_q, data_q__in=answer.answer.split(','))
+                    resultats.append({'q_type': answer.question.type,'num_q': answer.question.num_q, 'num_map': mapping.num_map})
+            else:
+                pass
+
+        print(resultats)
         return resultats
 
 

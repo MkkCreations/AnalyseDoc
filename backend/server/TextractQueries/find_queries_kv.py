@@ -129,9 +129,6 @@ def upload_to_s3(s3BucketName, documentName, diligenceId, documentType):
     )
 
 
-
-
-
 def get_result_and_confidence(
     s3BucketName, documentName, diligenceId, documentType
 ):
@@ -180,7 +177,7 @@ def format_queries_as_dict(question_number, answer, confidence_score, documentTy
     print("in format_queries_as_dict")
     return {
         "no_ici": question_number,
-        "answer": answer,
+        "answer": answer.lower(),
         "confidence_score": confidence_score,
         "document_type": documentType.lower(),
     }

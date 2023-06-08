@@ -112,7 +112,7 @@ def search_for_wolfsberg_answer(
         if item["No"] == wolfsberg_question_number:
             return {
                 "no_ici": ICI_question_number,
-                "answer": item["Answer"],
+                "answer": item["Answer"].lower(),
                 "confidence_score": confidence_score,
                 "document_type": "wolfsberg",
             }

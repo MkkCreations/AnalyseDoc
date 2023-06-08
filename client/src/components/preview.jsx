@@ -71,11 +71,11 @@ function Preview() {
     const handleChange = (key, e) => {
         console.log(e);
         if (questions[key].Type === 'R') {
-            if (e.target.value === 'Yes') {
-                questions[key].Answer = 'Yes';
+            if (e.target.value === 'yes') {
+                questions[key].Answer = 'yes';
                 questions[key].AnswerType = 'H';
             } else {
-                questions[key].Answer = 'No';
+                questions[key].Answer = 'no';
                 questions[key].AnswerType = 'H';
             }
         } else if(questions[key].Type === 'C') {
@@ -125,11 +125,13 @@ function Preview() {
     }
 
     const putAnswer = async (answer) => {
+        setFetch(true);
         try {
             await client.put('answers/', answer)
         } catch (error) {
             console.log(error);
         }
+        setFetch(false);
     }
 
     useEffect(() => {
@@ -169,6 +171,11 @@ function Preview() {
                                     <form onChange={(e)=>handleChange(key,e)}>
                                         {questions[key].Type === 'C'?
                                             <div className='checkbox'>
+                                                { questions[key].AiAnswer?
+                                                    <input type="text" defaultValue={questions[key].AiAnswer} />
+                                                    :
+                                                    ''
+                                                }
                                                 {Object.values(questions[key].checkboxs).map(
                                                     (checkbox, index) => {
                                                         return <div key={index}>
@@ -184,9 +191,9 @@ function Preview() {
                                         {questions[key].Type === 'R' ?
                                             <div> 
                                                 <label>Yes</label>
-                                                <input type='radio' name={key} value={'Yes'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'Yes'?true:false} />
+                                                <input type='radio' name={key} value={'yes'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'yes' ?true:false} />
                                                 <label>No</label>
-                                                <input type='radio' name={key} value={'No'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'No'?true:false} />
+                                                <input type='radio' name={key} value={'no'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'no'?true:false} />
                                                 <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                             </div>
                                             :
@@ -199,7 +206,7 @@ function Preview() {
                                                 <p>{questions[key].documentName}</p>
                                                 <p>{questions[key].resAccepted === 1?'Accepted':''}</p>
                                                 <div>
-                                                    <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].AiConfidence===100?'none':'unset'}}>Accept</button>
+                                                    <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].resAccepted === 1?'none':'unset'}}>Accept</button>
                                                     <button onClick={(e) => handleDelete(key, e)} style={{display: questions[key].AiAnswer || questions[key].Answer ?'unset':'none'}}>Delete</button>
                                                 </div>
                                             </div>

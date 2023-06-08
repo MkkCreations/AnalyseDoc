@@ -31,6 +31,8 @@ def mapping(mappingData, diligence_id):
                     text(annotation, key['answer'])
                 elif annotation['/T'].decode() == key['num_map'] and key['q_type'] == 'R':
                     radio(annotation)
+                elif annotation['/T'].decode() == key['num_map'] and key['q_type'] == 'C':
+                    checkbox(annotation)
                 
     writer.write(f'{os.path.realpath(".")+"/TextractQueries/media/ici/"}ici{diligence_id}.pdf', reader)
     
