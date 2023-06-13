@@ -43,7 +43,7 @@ function Dashboard() {
                         <div className='graphics'>
                             <h3>Type of responses</h3>
                             <hr />
-                            <p className='definition'>Persentaig of how many questions were answered by the AI and how many by human</p>
+                            <p className='definition'>Percentage of how many questions were answered by the AI and how many by human</p>
                             <p className='definition'>ex: <b>ai_answers / total_answers</b></p>
                             <div>
                                 <p>Total response: <b>{data.total_res}</b></p>
@@ -54,7 +54,7 @@ function Dashboard() {
                             </div>
                             <h3>Documents</h3>
                             <hr />
-                            <p className='definition'>Here you can find how many documents has been given and the persentage of the number os answeres were find by each document</p>
+                            <p className='definition'>Here you can find how many documents has been given and the percentage of the number os answeres were find by each document</p>
                             <p className='definition'>ex: <b>wolfsberg_answers / total_answers</b></p>
                             <div>
                                 <p >Total documents: <b>{data.total_docs}</b></p>

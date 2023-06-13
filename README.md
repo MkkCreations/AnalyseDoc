@@ -7,7 +7,7 @@ In this project, the main task is to perform a Due Deligence with only the inser
 
 <h2>STACKS</h2>
 
-[![My Skills](https://skills.thijs.gg/icons?i=react,django,aws,mysql)](https://skills.thijs.gg)
+[![My Skills](https://skills.thijs.gg/icons?i=react,django,aws,mysql)](https://skills.thijs.gg)  
 
 
 <h2>TO RUN THE PROJECT</h2>
