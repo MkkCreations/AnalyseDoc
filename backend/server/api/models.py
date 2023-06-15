@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -41,8 +41,8 @@ class Diligence(models.Model):
                 },{
                 'id_res': answer.id , 
                 'ai_confidence': answer.ai_confidence, 
-                'ai_res': answer.ai_res, 
-                'answer': answer.answer, 
+                'ai_res': answer.ai_res.lower() if answer.ai_res else None, 
+                'answer': answer.answer.lower() if answer.answer else None, 
                 'answer_type': answer.answer_type, 
                 'document_name': answer.document_name, 
                 'ai_res_accepted': answer.ai_res_accepted

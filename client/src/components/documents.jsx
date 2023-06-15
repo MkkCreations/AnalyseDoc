@@ -135,16 +135,16 @@ function Questions(doc) {
 
 
     const fetchQuestions = async () => {
-        console.log(doc);
+        setQuestions({});
         try {
-            console.log(doc);
             await client.get(`answers/${user.dili.id}/${doc.doc.id}`)
                 .then(res => {
+                    let questionsTemp = {};
                     for (const key in res.data.data) {
                         const question = new Question(res.data.data[key][0].id_q, res.data.data[key][0].num_q, res.data.data[key][0].question, res.data.data[key][0].type, res.data.data[key][0].parent, res.data.data[key][1].id_res, res.data.data[key][1].ai_res, res.data.data[key][1].answer, res.data.data[key][1].answer_type, Number(res.data.data[key][1].ai_confidence).toFixed(0), res.data.data[key][1].document_name, res.data.data[key][1].ai_res_accepted, res.data.data[key][2]);
-                        questions[key] = question;
+                        questionsTemp[key] = question;
                     }
-                    setQuestions({...questions});
+                    setQuestions({...questionsTemp});
                 })
         } catch (error) {
             console.log(error);
@@ -153,11 +153,7 @@ function Questions(doc) {
 
 
     const handleChange = (key, e) => {
-        console.log(e.target.value);
-        console.log(key);
-        console.log(questions[key]);
         questions[key].Answer = e.target.value;
-        console.log(questions[key]);
     }
     const handleAccept = (key, e) => {
         e.preventDefault();
@@ -194,7 +190,6 @@ function Questions(doc) {
         setQuestions({});
         if (doc.doc.id !== undefined) {
             fetchQuestions();
-            console.log(questions);
         }
     }, [edit, setEdit, doc])
 
@@ -234,6 +229,8 @@ function Questions(doc) {
                                     <label>No</label>
                                     <input type='radio' name={key} value={'no'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'no'?true:false} />
                                     <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
+                                    <p>{questions[key].documentName}</p>
+                                    <p>{questions[key].resAccepted === 1?'Accepted':''}</p>
                                 </div>
                                 :
                                 ''
@@ -244,10 +241,6 @@ function Questions(doc) {
                                     <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
                                     <p>{questions[key].documentName}</p>
                                     <p>{questions[key].resAccepted === 1?'Accepted':''}</p>
-                                    <div>
-                                        <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].resAccepted === 1?'none':'unset'}}>Accept</button>
-                                        <button onClick={(e) => handleDelete(key, e)} style={{display: questions[key].AiAnswer || questions[key].Answer ?'unset':'none'}}>Delete</button>
-                                    </div>
                                 </div>
                                 :
                                 ''

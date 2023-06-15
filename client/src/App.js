@@ -12,6 +12,7 @@ import Preview from './components/preview';
 import Documents from './components/documents';
 import Account from './components/account';
 import Dashboard from './components/dashboard';
+import GeneralDashboard from './components/generalDashboard';
 
 
 function App() {
@@ -26,6 +27,12 @@ function App() {
             <ProtectedRoute>
               <Nav />
               <Projects />
+            </ProtectedRoute>
+          }/>
+          <Route path='/dashboard' element={
+            <ProtectedRoute>
+              <Nav />
+              <GeneralDashboard />
             </ProtectedRoute>
           }/>
           <Route path='/new' element={

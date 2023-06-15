@@ -31,6 +31,7 @@ function Nav() {
             <div className='nav' style={{display:menu?'flex':''}}>
                 <span>
                     <CustomLink to='/projects'>Projects</CustomLink>
+                    <CustomLink to='/dashboard'>Dashboard</CustomLink>
                 </span>
                 <span>
                     <CustomLink to='/account'>Account</CustomLink>

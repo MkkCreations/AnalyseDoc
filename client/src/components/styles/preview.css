@@ -87,6 +87,10 @@
     text-align: center;
 }
 
+.iciQ > span {
+    z-index: 2;
+}
+
 .iciQ h3 {
     padding: 2% 0;
 }
@@ -121,6 +125,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 10px;
 }
 
 .question div form div p {
@@ -140,6 +145,14 @@
 .question div form div input[type="text"]:enabled {
     background-color: #ffffff;
     border: 1px solid rgb(185, 185, 185);
+}
+
+.radioInp {
+    text-align: left !important;
+}
+
+.radioInp > * {
+    margin: 0 10px;
 }
 
 .question div form div button {

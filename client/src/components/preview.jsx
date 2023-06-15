@@ -179,7 +179,7 @@ function Preview() {
                                                 {Object.values(questions[key].checkboxs).map(
                                                     (checkbox, index) => {
                                                         return <div key={index}>
-                                                            <input type='checkbox' name={checkbox.num_q} value={checkbox.data_q} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer.includes(checkbox.data_q)?true:false: questions[key].Answer? questions[key].Answer.includes(checkbox.data_q)?true:false:false} />
+                                                            <input type='checkbox' name={checkbox.num_q} value={checkbox.data_q} defaultChecked={questions[key].AiAnswer? questions[key].AiAnswer.toLowerCase().includes(checkbox.data_q.toLowerCase())?true:false: questions[key].Answer? questions[key].Answer.toLowerCase().includes(checkbox.data_q.toLowerCase())?true:false:false} />
                                                             <label>{checkbox.data_q}</label>
                                                         </div>
                                                     }
@@ -192,9 +192,17 @@ function Preview() {
                                             <div> 
                                                 <label>Yes</label>
                                                 <input type='radio' name={key} value={'yes'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'yes' ?true:false} />
+                                                
                                                 <label>No</label>
                                                 <input type='radio' name={key} value={'no'} defaultChecked={(questions[key].Answer? questions[key].Answer: questions[key].AiAnswer) === 'no'?true:false} />
+
                                                 <p>{questions[key].AiConfidence? questions[key].AiConfidence+'%' : 0+'%'}</p>
+                                                <p>{questions[key].documentName}</p>
+                                                <p>{questions[key].resAccepted === 1?'Accepted':''}</p>
+                                                <div>
+                                                    <button onClick={(e) => handleAccept(key, e)} style={{display: questions[key].resAccepted === 1?'none':'unset'}}>Accept</button>
+                                                    <button onClick={(e) => handleDelete(key, e)} style={{display: questions[key].AiAnswer || questions[key].Answer ?'unset':'none'}}>Delete</button>
+                                                </div>
                                             </div>
                                             :
                                             ''

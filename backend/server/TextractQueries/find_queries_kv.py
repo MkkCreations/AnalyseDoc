@@ -177,9 +177,9 @@ def format_queries_as_dict(question_number, answer, confidence_score, documentTy
     print("in format_queries_as_dict")
     return {
         "no_ici": question_number,
-        "answer": answer.lower(),
+        "answer": answer,
         "confidence_score": confidence_score,
-        "document_type": documentType.lower(),
+        "document_type": documentType,
     }
 
 def get_kv_map(s3BucketName, documentName, diligenceId, documentType):
